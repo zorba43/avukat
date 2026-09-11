@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="300 210 600 500">
+  <g transform="translate(600 455)">
+    <!-- circular G -->
+    <path d="M 0,-230 A 230,230 0 1 0 0,230 A 230,230 0 0 0 150,175" fill="none" stroke="#16233F" stroke-width="24" stroke-linecap="round"/>
+    <!-- H -->
+    <path d="M -105,-165 L -105,170 M 105,-165 L 105,170 M -105,0 L 105,0" fill="none" stroke="#16233F" stroke-width="28" stroke-linecap="square"/>
+    <!-- central pillar / I -->
+    <path d="M -30,-185 L 30,-185 L 20,-165 L 20,175 L 55,190 L 55,210 L -55,210 L -55,190 L -20,175 L -20,-165 Z" fill="#B8862F"/>
+    <!-- scale beam -->
+    <path d="M -205,-75 Q 0,-150 205,-75" fill="none" stroke="#B8862F" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="-205" cy="-75" r="10" fill="#B8862F"/>
+    <circle cx="205" cy="-75" r="10" fill="#B8862F"/>
+    <!-- left scale -->
+    <path d="M -205,-65 L -265,55 M -205,-65 L -145,55" fill="none" stroke="#B8862F" stroke-width="10"/>
+    <path d="M -285,55 Q -205,105 -125,55 Z" fill="#B8862F"/>
+    <!-- right scale -->
+    <path d="M 205,-65 L 145,55 M 205,-65 L 265,55" fill="none" stroke="#B8862F" stroke-width="10"/>
+    <path d="M 125,55 Q 205,105 285,55 Z" fill="#B8862F"/>
+    <!-- base -->
+    <path d="M -65,210 L 65,210 L 85,230 L 85,245 L -85,245 L -85,230 Z" fill="#B8862F"/>
+  </g>
+</svg>

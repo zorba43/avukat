@@ -1,0 +1,205 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useKazaBildir } from "@/contexts/KazaBildirContext";
+
+const KAYNAK_SECENEKLERI = [
+  { value: "sosyal", label: "Sosyal Medya" },
+  { value: "arkadas", label: "Arkadaş Tavsiyesi" },
+  { value: "diger", label: "Diğer" },
+];
+
+export default function TamamlaForm() {
+  const router = useRouter();
+  const { adim1, adim2, adim3, adim4, adim5, setAdim5 } = useKazaBildir();
+
+  const [kaynak, setKaynak] = useState(adim5?.kaynak ?? "");
+  const [digerMetin, setDigerMetin] = useState(adim5?.kaynakDetay ?? "");
+  const [dokunuldu, setDokunuldu] = useState(false);
+  const [gonderildi, setGonderildi] = useState(false);
+
+  // Sayfa doğrudan açıldıysa ya da yenilendiyse (context sıfırlanır) önceki
+  // adımlar eksik demektir — akışı baştan başlat.
+  useEffect(() => {
+    if (!adim1 || !adim2 || adim3.length === 0 || adim4.length < 3) {
+      router.replace("/kaza-bildir");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const digerSecili = kaynak === "diger";
+
+  const hata = useMemo(() => {
+    if (!kaynak) return "Bize nasıl ulaştığınızı seçin.";
+    if (digerSecili && digerMetin.trim().length === 0) {
+      return "Lütfen kısaca belirtin.";
+    }
+    return undefined;
+  }, [kaynak, digerSecili, digerMetin]);
+
+  const gecerli = !hata;
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setDokunuldu(true);
+    if (!gecerli) return;
+
+    const data = {
+      kaynak,
+      kaynakDetay: digerSecili ? digerMetin.trim() : undefined,
+    };
+    setAdim5(data);
+
+    // Akışın tamamı artık bellekte GERÇEK dosyalarla birlikte duruyor (context).
+    // Bu obje bir sonraki aşamada olduğu gibi API'ye (FormData) verilecek.
+    console.log("Kaza Bildir — tüm başvuru:", {
+      adim1,
+      adim2,
+      adim3,
+      adim4,
+      adim5: data,
+    });
+
+    setGonderildi(true);
+  }
+
+  if (!adim1 || !adim2 || adim3.length === 0 || adim4.length < 3) {
+    return null;
+  }
+
+  if (gonderildi) {
+    return (
+      <div className="mt-7 flex flex-col items-center gap-3 py-6 text-center">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-navy text-white">
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </span>
+        <h2 className="font-serif text-xl font-medium text-navy">
+          Bildiriminiz alındı
+        </h2>
+        <p className="max-w-[32ch] text-sm text-slate">
+          Dosyalarınızı inceleyip en kısa sürede sizinle iletişime geçeceğiz.
+        </p>
+        <Link
+          href="/"
+          className="mt-2 text-sm font-medium text-navy underline decoration-line underline-offset-4 transition-colors duration-150 ease-out hover:decoration-navy"
+        >
+          Ana sayfaya dön
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="mt-7">
+      <fieldset>
+        <legend className="text-[13px] text-slate">Bize nasıl ulaştınız?</legend>
+        <div className="mt-1.5 space-y-2.5">
+          {KAYNAK_SECENEKLERI.map((secenek) => {
+            const secili = kaynak === secenek.value;
+            return (
+              <label
+                key={secenek.value}
+                className={[
+                  "flex cursor-pointer items-center gap-3 rounded-[6px] border px-4 py-3 text-[15px]",
+                  "transition-colors duration-150 ease-out",
+                  "focus-within:ring-2 focus-within:ring-navy/10",
+                  secili
+                    ? "border-navy bg-navy/[0.04] font-medium text-navy"
+                    : "border-line text-charcoal hover:border-slate",
+                ].join(" ")}
+              >
+                <input
+                  type="radio"
+                  name="kaynak"
+                  value={secenek.value}
+                  checked={secili}
+                  onChange={(e) => {
+                    setKaynak(e.target.value);
+                    setDokunuldu(true);
+                  }}
+                  className="sr-only"
+                />
+                <span
+                  aria-hidden="true"
+                  className={[
+                    "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                    secili ? "border-navy" : "border-line",
+                  ].join(" ")}
+                >
+                  {secili && <span className="h-2 w-2 rounded-full bg-navy" />}
+                </span>
+                {secenek.label}
+              </label>
+            );
+          })}
+        </div>
+
+        {digerSecili && (
+          <input
+            type="text"
+            autoFocus
+            placeholder="Nereden duyduğunuzu kısaca yazın"
+            value={digerMetin}
+            onChange={(e) => setDigerMetin(e.target.value)}
+            onBlur={() => setDokunuldu(true)}
+            className={[
+              "mt-2.5 w-full rounded-[6px] border bg-paper px-3.5 py-2.5 text-[15px] text-charcoal",
+              "placeholder:text-slate/50 transition-colors duration-150 ease-out",
+              "focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/10",
+              "border-line",
+            ].join(" ")}
+          />
+        )}
+
+        {dokunuldu && hata && (
+          <p className="mt-1.5 text-[13px] text-urgent">{hata}</p>
+        )}
+      </fieldset>
+
+      <div className="mt-6">
+        <button
+          type="submit"
+          disabled={!gecerli}
+          className={
+            gecerli
+              ? "cta w-full justify-center"
+              : "flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-[6px] bg-line px-[1.9rem] py-[0.95rem] text-[1.0625rem] font-semibold leading-none text-slate"
+          }
+        >
+          Gönder
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </button>
+
+        <p className="mt-3 text-[13px] text-slate">
+          Bilgileriniz yalnızca bu başvuru için kullanılır.
+        </p>
+      </div>
+    </form>
+  );
+}
