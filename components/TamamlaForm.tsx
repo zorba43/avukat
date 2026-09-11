@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { useKazaBildir } from "@/contexts/KazaBildirContext";
+import { slugifyIsim } from "@/lib/slug";
 
 const KAYNAK_SECENEKLERI = [
   { value: "sosyal", label: "Sosyal Medya" },
@@ -66,29 +67,36 @@ export default function TamamlaForm() {
     setGonderiliyor(true);
 
     try {
-      // Bu id hem Blob klasör öneki hem de veritabanı birincil anahtarı hem de
-      // /basvuru/[id] linkinin tahmin edilemez parçası olarak kullanılır.
+      // id — veritabanı birincil anahtarı ve /basvuru/[id] linkinin tahmin
+      // edilemez parçası. Tam UUID olarak kalır, hiçbir yerde kısaltılmaz.
       const id = crypto.randomUUID();
+
+      // Blob'daki klasör adı ise okunabilir olsun diye isim + tarih + id'nin
+      // ilk 6 karakterinden oluşur (örn. ahmet-yilmaz-2026-09-11-a3f9c1).
+      // Aynı isim + aynı gün çakışsa bile kısa kod tekilliği sağlar.
+      const bugun = new Date().toISOString().slice(0, 10);
+      const kisaKod = id.slice(0, 6);
+      const klasorOneki = `basvurular/${slugifyIsim(adim1!.ad)}-${bugun}-${kisaKod}`;
 
       const [ruhsatUrl, ehliyetOnUrl, ehliyetArkaUrl, kazaRaporuUrls, fotograflarUrls] =
         await Promise.all([
-          blobaYukle(adim2!.ruhsat, `basvurular/${id}/ruhsat/${adim2!.ruhsat.name}`),
+          blobaYukle(adim2!.ruhsat, `${klasorOneki}/ruhsat/${adim2!.ruhsat.name}`),
           blobaYukle(
             adim2!.ehliyetOn,
-            `basvurular/${id}/ehliyet-on/${adim2!.ehliyetOn.name}`,
+            `${klasorOneki}/ehliyet-on/${adim2!.ehliyetOn.name}`,
           ),
           blobaYukle(
             adim2!.ehliyetArka,
-            `basvurular/${id}/ehliyet-arka/${adim2!.ehliyetArka.name}`,
+            `${klasorOneki}/ehliyet-arka/${adim2!.ehliyetArka.name}`,
           ),
           Promise.all(
             adim3.map((f, i) =>
-              blobaYukle(f, `basvurular/${id}/kaza-raporu/${i}-${f.name}`),
+              blobaYukle(f, `${klasorOneki}/kaza-raporu/${i}-${f.name}`),
             ),
           ),
           Promise.all(
             adim4.map((f, i) =>
-              blobaYukle(f, `basvurular/${id}/fotograflar/${i}-${f.name}`),
+              blobaYukle(f, `${klasorOneki}/fotograflar/${i}-${f.name}`),
             ),
           ),
         ]);
