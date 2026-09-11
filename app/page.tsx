@@ -122,15 +122,56 @@ const TRUST = [
   },
 ];
 
+/**
+ * Sosyal medya / web sitesi rozeti — dairesel, marka rengi zeminli, hafif
+ * kabartma gölgeli. Hover'da ölçek + gölge büyür (0.15s, abartısız).
+ */
+function SosyalRozet({
+  href,
+  label,
+  className,
+  children,
+  internal = false,
+}: {
+  href: string;
+  label: string;
+  className: string;
+  children: React.ReactNode;
+  internal?: boolean;
+}) {
+  const rozetSinifi = [
+    "flex h-[30px] w-[30px] items-center justify-center rounded-full",
+    "shadow-[0_2px_6px_rgba(0,0,0,0.15)] transition-transform duration-150 ease-out",
+    "hover:scale-[1.08] hover:shadow-[0_4px_10px_rgba(0,0,0,0.2)]",
+    className,
+  ].join(" ");
+
+  if (internal) {
+    return (
+      <Link href={href} aria-label={label} className={rozetSinifi}>
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <a href={href} aria-label={label} className={rozetSinifi}>
+      {children}
+    </a>
+  );
+}
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-paper">
       {/* ============================ HEADER ============================ */}
       <header className="border-b border-line bg-paper">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8">
+        <div className="mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 py-4 md:px-8">
+          {/* Sol: logo. col-start-* sabitleri: nav mobilde display:none olunca
+              grid auto-placement diğer öğeleri sola kaydırmasın diye şart. */}
           <Link
             href="/"
-            className="flex items-center gap-2.5"
+            className="col-start-1 flex items-center justify-self-start gap-2.5"
             aria-label="Gökçe Hukuk Bürosu — ana sayfa"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -140,62 +181,49 @@ export default function Home() {
             </span>
           </Link>
 
-          <div className="flex items-center gap-5">
-            {/* Nav + sosyal medya ikonları birlikte gizlenir/görünür (md ve üstü) */}
-            <div className="hidden items-center gap-8 md:flex">
-              <nav className="flex items-center gap-8">
-                <a
-                  href="#hakkimizda"
-                  className="text-sm font-medium text-navy transition-colors duration-150 ease-out hover:text-amber"
-                >
-                  Hakkımızda
-                </a>
-                <a
-                  href="#surec"
-                  className="text-sm font-medium text-navy transition-colors duration-150 ease-out hover:text-amber"
-                >
-                  Süreç
-                </a>
-                <a
-                  href="#iletisim"
-                  className="text-sm font-medium text-navy transition-colors duration-150 ease-out hover:text-amber"
-                >
-                  İletişim
-                </a>
-              </nav>
+          {/* Orta: nav — header genişliğinde tam ortalanmış (md ve üstü) */}
+          <nav className="col-start-2 hidden items-center gap-8 lg:flex">
+            <a
+              href="#hakkimizda"
+              className="text-sm font-medium text-navy transition-colors duration-150 ease-out hover:text-amber"
+            >
+              Hakkımızda
+            </a>
+            <a
+              href="#surec"
+              className="text-sm font-medium text-navy transition-colors duration-150 ease-out hover:text-amber"
+            >
+              Süreç
+            </a>
+            <a
+              href="#iletisim"
+              className="text-sm font-medium text-navy transition-colors duration-150 ease-out hover:text-amber"
+            >
+              İletişim
+            </a>
+          </nav>
 
-              <div className="flex items-center gap-[14px]">
-                {/* Placeholder linkler — gerçek hesaplar eklenince href güncellenip
-                    target="_blank" rel="noopener noreferrer" eklenecek. */}
-                <a
-                  href="#"
-                  aria-label="LinkedIn"
-                  className="text-navy transition-colors duration-150 ease-out hover:text-amber"
-                >
-                  <FaLinkedin className="h-6 w-6" />
-                </a>
-                <a
-                  href="#"
-                  aria-label="Instagram"
-                  className="text-navy transition-colors duration-150 ease-out hover:text-amber"
-                >
-                  <FaInstagram className="h-6 w-6" />
-                </a>
-                <a
-                  href="#"
-                  aria-label="YouTube"
-                  className="text-navy transition-colors duration-150 ease-out hover:text-amber"
-                >
-                  <FaYoutube className="h-6 w-6" />
-                </a>
-                <Link
-                  href="/"
-                  aria-label="Web sitesi"
-                  className="text-navy transition-colors duration-150 ease-out hover:text-amber"
-                >
-                  <FaGlobeAmericas className="h-6 w-6" />
-                </Link>
-              </div>
+          {/* Sağ: sosyal rozetler + telefon */}
+          <div className="col-start-3 flex items-center justify-self-end gap-5">
+            <div className="hidden items-center gap-[10px] lg:flex">
+              {/* Placeholder linkler — gerçek hesaplar eklenince href güncellenip
+                  target="_blank" rel="noopener noreferrer" eklenecek. */}
+              <SosyalRozet href="#" label="LinkedIn" className="bg-[#0A66C2] text-white">
+                <FaLinkedin className="h-4 w-4" />
+              </SosyalRozet>
+              <SosyalRozet
+                href="#"
+                label="Instagram"
+                className="bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white"
+              >
+                <FaInstagram className="h-4 w-4" />
+              </SosyalRozet>
+              <SosyalRozet href="#" label="YouTube" className="bg-[#FF0000] text-white">
+                <FaYoutube className="h-4 w-4" />
+              </SosyalRozet>
+              <SosyalRozet href="/" label="Web sitesi" className="bg-navy text-amber" internal>
+                <FaGlobeAmericas className="h-4 w-4" />
+              </SosyalRozet>
             </div>
 
             <a
