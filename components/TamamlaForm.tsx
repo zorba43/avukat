@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { upload } from "@vercel/blob/client";
 import { useKazaBildir } from "@/contexts/KazaBildirContext";
 
 const KAYNAK_SECENEKLERI = [
@@ -11,6 +12,14 @@ const KAYNAK_SECENEKLERI = [
   { value: "diger", label: "Diğer" },
 ];
 
+/** Dosyayı tarayıcıdan doğrudan Vercel Blob'a yükler (sunucu fonksiyonundan geçmez). */
+function blobaYukle(file: File, pathname: string) {
+  return upload(pathname, file, {
+    access: "public",
+    handleUploadUrl: "/api/blob-upload",
+  }).then((blob) => blob.url);
+}
+
 export default function TamamlaForm() {
   const router = useRouter();
   const { adim1, adim2, adim3, adim4, adim5, setAdim5 } = useKazaBildir();
@@ -18,6 +27,8 @@ export default function TamamlaForm() {
   const [kaynak, setKaynak] = useState(adim5?.kaynak ?? "");
   const [digerMetin, setDigerMetin] = useState(adim5?.kaynakDetay ?? "");
   const [dokunuldu, setDokunuldu] = useState(false);
+  const [gonderiliyor, setGonderiliyor] = useState(false);
+  const [gonderimHatasi, setGonderimHatasi] = useState<string | null>(null);
   const [gonderildi, setGonderildi] = useState(false);
 
   // Sayfa doğrudan açıldıysa ya da yenilendiyse (context sıfırlanır) önceki
@@ -41,28 +52,80 @@ export default function TamamlaForm() {
 
   const gecerli = !hata;
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setDokunuldu(true);
-    if (!gecerli) return;
+    if (!gecerli || gonderiliyor) return;
 
-    const data = {
+    const adim5Verisi = {
       kaynak,
       kaynakDetay: digerSecili ? digerMetin.trim() : undefined,
     };
-    setAdim5(data);
+    setAdim5(adim5Verisi);
+    setGonderimHatasi(null);
+    setGonderiliyor(true);
 
-    // Akışın tamamı artık bellekte GERÇEK dosyalarla birlikte duruyor (context).
-    // Bu obje bir sonraki aşamada olduğu gibi API'ye (FormData) verilecek.
-    console.log("Kaza Bildir — tüm başvuru:", {
-      adim1,
-      adim2,
-      adim3,
-      adim4,
-      adim5: data,
-    });
+    try {
+      // Bu id hem Blob klasör öneki hem de veritabanı birincil anahtarı hem de
+      // /basvuru/[id] linkinin tahmin edilemez parçası olarak kullanılır.
+      const id = crypto.randomUUID();
 
-    setGonderildi(true);
+      const [ruhsatUrl, ehliyetOnUrl, ehliyetArkaUrl, kazaRaporuUrls, fotograflarUrls] =
+        await Promise.all([
+          blobaYukle(adim2!.ruhsat, `basvurular/${id}/ruhsat/${adim2!.ruhsat.name}`),
+          blobaYukle(
+            adim2!.ehliyetOn,
+            `basvurular/${id}/ehliyet-on/${adim2!.ehliyetOn.name}`,
+          ),
+          blobaYukle(
+            adim2!.ehliyetArka,
+            `basvurular/${id}/ehliyet-arka/${adim2!.ehliyetArka.name}`,
+          ),
+          Promise.all(
+            adim3.map((f, i) =>
+              blobaYukle(f, `basvurular/${id}/kaza-raporu/${i}-${f.name}`),
+            ),
+          ),
+          Promise.all(
+            adim4.map((f, i) =>
+              blobaYukle(f, `basvurular/${id}/fotograflar/${i}-${f.name}`),
+            ),
+          ),
+        ]);
+
+      const res = await fetch("/api/kaza-bildirimi", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          ad: adim1!.ad,
+          telefon: adim1!.telefon,
+          tarih: adim1!.tarih,
+          kazaDurumu: adim1!.kazaDurumu,
+          ruhsatUrl,
+          ehliyetOnUrl,
+          ehliyetArkaUrl,
+          kazaRaporuUrls,
+          fotograflarUrls,
+          kaynak: adim5Verisi.kaynak,
+          kaynakDetay: adim5Verisi.kaynakDetay,
+        }),
+      });
+
+      if (!res.ok) {
+        const govde = await res.json().catch(() => ({}));
+        throw new Error(govde.error || "Gönderim başarısız oldu.");
+      }
+
+      setGonderildi(true);
+    } catch (err) {
+      console.error("Kaza Bildir — gönderim hatası:", err);
+      setGonderimHatasi(
+        "Bildiriminiz gönderilemedi. İnternet bağlantınızı kontrol edip tekrar deneyin.",
+      );
+    } finally {
+      setGonderiliyor(false);
+    }
   }
 
   if (!adim1 || !adim2 || adim3.length === 0 || adim4.length < 3) {
@@ -173,31 +236,39 @@ export default function TamamlaForm() {
       <div className="mt-6">
         <button
           type="submit"
-          disabled={!gecerli}
+          disabled={!gecerli || gonderiliyor}
           className={
-            gecerli
+            gecerli && !gonderiliyor
               ? "cta w-full justify-center"
               : "flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-[6px] bg-line px-[1.9rem] py-[0.95rem] text-[1.0625rem] font-semibold leading-none text-slate"
           }
         >
-          Gönder
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
+          {gonderiliyor ? "Gönderiliyor…" : "Gönder"}
+          {!gonderiliyor && (
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          )}
         </button>
 
+        {gonderimHatasi && (
+          <p className="mt-3 text-[13px] text-urgent">{gonderimHatasi}</p>
+        )}
+
         <p className="mt-3 text-[13px] text-slate">
-          Bilgileriniz yalnızca bu başvuru için kullanılır.
+          {gonderiliyor
+            ? "Dosyalarınız yükleniyor, lütfen sayfadan ayrılmayın."
+            : "Bilgileriniz yalnızca bu başvuru için kullanılır."}
         </p>
       </div>
     </form>

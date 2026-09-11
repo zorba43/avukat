@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+/// Bir kaza bildirim başvurusu — 5 adımlık formun tamamı burada birleşir.
+/// id istemci tarafında (crypto.randomUUID()) üretilir; hem birincil anahtar
+/// hem de Blob depolamadaki dosya klasör öneki hem de /basvuru/[id] linkinin
+/// tahmin edilemez parçası olarak aynı değer kullanılır.
+model KazaBildirimi {
+  id         String   @id
+  createdAt  DateTime @default(now())
+
+  // Adım 1 — Kişisel bilgiler
+  ad         String
+  telefon    String
+  kazaTarihi DateTime
+  kazaDurumu String
+
+  // Adım 2 — Ruhsat & Ehliyet (Blob URL'leri)
+  ruhsatUrl      String
+  ehliyetOnUrl   String
+  ehliyetArkaUrl String
+
+  // Adım 3 — Kaza raporu belgeleri (1-5 adet, PDF veya görsel)
+  kazaRaporuUrls String[]
+
+  // Adım 4 — Olay yeri fotoğrafları (3-20 adet)
+  fotograflarUrls String[]
+
+  // Adım 5 — Tamamla
+  kaynak      String
+  kaynakDetay String?
+}
