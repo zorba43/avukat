@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FaLinkedin, FaInstagram, FaYoutube, FaGlobeAmericas } from "react-icons/fa";
 import CtaButton from "@/components/CtaButton";
 
 const PHONE_DISPLAY = "+90 (533) 427 55 73";
@@ -139,37 +140,84 @@ export default function Home() {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-8 md:flex">
-            <a href="#hakkimizda" className="text-sm text-slate transition-colors hover:text-navy">
-              Hakkımızda
-            </a>
-            <a href="#surec" className="text-sm text-slate transition-colors hover:text-navy">
-              Süreç
-            </a>
-            <a href="#iletisim" className="text-sm text-slate transition-colors hover:text-navy">
-              İletişim
-            </a>
-          </nav>
+          <div className="flex items-center gap-5">
+            {/* Nav + sosyal medya ikonları birlikte gizlenir/görünür (md ve üstü) */}
+            <div className="hidden items-center gap-8 md:flex">
+              <nav className="flex items-center gap-8">
+                <a
+                  href="#hakkimizda"
+                  className="text-sm font-medium text-navy transition-colors duration-150 ease-out hover:text-amber"
+                >
+                  Hakkımızda
+                </a>
+                <a
+                  href="#surec"
+                  className="text-sm font-medium text-navy transition-colors duration-150 ease-out hover:text-amber"
+                >
+                  Süreç
+                </a>
+                <a
+                  href="#iletisim"
+                  className="text-sm font-medium text-navy transition-colors duration-150 ease-out hover:text-amber"
+                >
+                  İletişim
+                </a>
+              </nav>
 
-          <a
-            href={PHONE_HREF}
-            className="flex shrink-0 items-center gap-2 whitespace-nowrap text-sm font-medium text-navy md:text-base"
-            aria-label={`Telefon: ${PHONE_DISPLAY}`}
-          >
-            <svg
-              className="h-4 w-4 shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+              <div className="flex items-center gap-[14px]">
+                {/* Placeholder linkler — gerçek hesaplar eklenince href güncellenip
+                    target="_blank" rel="noopener noreferrer" eklenecek. */}
+                <a
+                  href="#"
+                  aria-label="LinkedIn"
+                  className="text-navy transition-colors duration-150 ease-out hover:text-amber"
+                >
+                  <FaLinkedin className="h-6 w-6" />
+                </a>
+                <a
+                  href="#"
+                  aria-label="Instagram"
+                  className="text-navy transition-colors duration-150 ease-out hover:text-amber"
+                >
+                  <FaInstagram className="h-6 w-6" />
+                </a>
+                <a
+                  href="#"
+                  aria-label="YouTube"
+                  className="text-navy transition-colors duration-150 ease-out hover:text-amber"
+                >
+                  <FaYoutube className="h-6 w-6" />
+                </a>
+                <Link
+                  href="/"
+                  aria-label="Web sitesi"
+                  className="text-navy transition-colors duration-150 ease-out hover:text-amber"
+                >
+                  <FaGlobeAmericas className="h-6 w-6" />
+                </Link>
+              </div>
+            </div>
+
+            <a
+              href={PHONE_HREF}
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap text-sm font-medium text-navy md:text-base"
+              aria-label={`Telefon: ${PHONE_DISPLAY}`}
             >
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
-            </svg>
-            <span className="hidden sm:inline">{PHONE_DISPLAY}</span>
-          </a>
+              <svg
+                className="h-4 w-4 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+              <span className="hidden sm:inline">{PHONE_DISPLAY}</span>
+            </a>
+          </div>
         </div>
       </header>
 
