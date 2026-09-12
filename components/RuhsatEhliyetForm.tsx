@@ -4,27 +4,51 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useKazaBildir } from "@/contexts/KazaBildirContext";
 
-type AlanKey = "ruhsat" | "ehliyetOn" | "ehliyetArka";
+type AlanKey =
+  | "ruhsat"
+  | "ehliyetOn"
+  | "ehliyetArka"
+  | "karsiTarafRuhsat"
+  | "karsiTarafEhliyetOn"
+  | "karsiTarafEhliyetArka";
 
-const ALANLAR: {
-  key: AlanKey;
-  baslik: string;
-  aciklama: string;
-}[] = [
+const ZORUNLU_ALANLAR: AlanKey[] = ["ruhsat", "ehliyetOn", "ehliyetArka"];
+
+type AlanTanimi = { key: AlanKey; baslik: string; aciklama: string };
+
+const SOL_ALANLAR: AlanTanimi[] = [
   {
     key: "ruhsat",
-    baslik: "Araç Ruhsatı",
+    baslik: "Araç Ruhsatınız",
     aciklama: "Ruhsatın bilgileri okunacak şekilde net bir fotoğrafı.",
   },
   {
     key: "ehliyetOn",
-    baslik: "Ehliyet — Ön Yüz",
+    baslik: "Ehliyetinizin Ön Yüzü",
     aciklama: "Sürücü belgenizin fotoğraflı ön yüzü.",
   },
   {
     key: "ehliyetArka",
-    baslik: "Ehliyet — Arka Yüz",
+    baslik: "Ehliyetinizin Arka Yüzü",
     aciklama: "Sürücü belgenizin arka yüzü.",
+  },
+];
+
+const SAG_ALANLAR: AlanTanimi[] = [
+  {
+    key: "karsiTarafRuhsat",
+    baslik: "Karşı Taraf Araç Ruhsatı",
+    aciklama: "Elinizdeyse karşı tarafın ruhsat fotoğrafı.",
+  },
+  {
+    key: "karsiTarafEhliyetOn",
+    baslik: "Karşı Taraf Ehliyeti — Ön Yüz",
+    aciklama: "Elinizdeyse karşı tarafın ehliyetinin ön yüzü.",
+  },
+  {
+    key: "karsiTarafEhliyetArka",
+    baslik: "Karşı Taraf Ehliyeti — Arka Yüz",
+    aciklama: "Elinizdeyse karşı tarafın ehliyetinin arka yüzü.",
   },
 ];
 
@@ -134,19 +158,29 @@ export default function RuhsatEhliyetForm() {
   const { adim2, setAdim2 } = useKazaBildir();
 
   // Geri dönülürse önceden seçilmiş dosyalar (context'ten) yeniden önizlenir.
-  const [secimler, setSecimler] = useState<Record<AlanKey, Secim | null>>(() => ({
-    ruhsat: adim2 ? { file: adim2.ruhsat, url: URL.createObjectURL(adim2.ruhsat) } : null,
-    ehliyetOn: adim2
-      ? { file: adim2.ehliyetOn, url: URL.createObjectURL(adim2.ehliyetOn) }
-      : null,
-    ehliyetArka: adim2
-      ? { file: adim2.ehliyetArka, url: URL.createObjectURL(adim2.ehliyetArka) }
-      : null,
-  }));
+  const [secimler, setSecimler] = useState<Record<AlanKey, Secim | null>>(() => {
+    const dosyaUrl = (file: File | undefined) =>
+      file ? { file, url: URL.createObjectURL(file) } : null;
+    return {
+      ruhsat: adim2 ? { file: adim2.ruhsat, url: URL.createObjectURL(adim2.ruhsat) } : null,
+      ehliyetOn: adim2
+        ? { file: adim2.ehliyetOn, url: URL.createObjectURL(adim2.ehliyetOn) }
+        : null,
+      ehliyetArka: adim2
+        ? { file: adim2.ehliyetArka, url: URL.createObjectURL(adim2.ehliyetArka) }
+        : null,
+      karsiTarafRuhsat: dosyaUrl(adim2?.karsiTarafRuhsat),
+      karsiTarafEhliyetOn: dosyaUrl(adim2?.karsiTarafEhliyetOn),
+      karsiTarafEhliyetArka: dosyaUrl(adim2?.karsiTarafEhliyetArka),
+    };
+  });
   const [dokunulan, setDokunulan] = useState<Record<AlanKey, boolean>>({
     ruhsat: false,
     ehliyetOn: false,
     ehliyetArka: false,
+    karsiTarafRuhsat: false,
+    karsiTarafEhliyetOn: false,
+    karsiTarafEhliyetArka: false,
   });
 
   // Bileşen kaldırılınca oluşturulan object URL'leri serbest bırak.
@@ -162,8 +196,13 @@ export default function RuhsatEhliyetForm() {
     (Object.keys(secimler) as AlanKey[]).forEach((key) => {
       const s = secimler[key];
       if (!s) {
-        e[key] = "Bu fotoğraf gerekli.";
-      } else if (!s.file.type.startsWith("image/")) {
+        // Karşı taraf alanları opsiyonel — boş bırakılması hata sayılmaz.
+        if (ZORUNLU_ALANLAR.includes(key)) {
+          e[key] = "Bu fotoğraf gerekli.";
+        }
+        return;
+      }
+      if (!s.file.type.startsWith("image/")) {
         e[key] = "Lütfen bir görsel dosyası yükleyin.";
       } else if (s.file.size > MAX_BOYUT) {
         e[key] = "Dosya 10 MB sınırını aşıyor.";
@@ -197,10 +236,12 @@ export default function RuhsatEhliyetForm() {
     if (!gecerli) return;
 
     const meta = Object.fromEntries(
-      (Object.keys(secimler) as AlanKey[]).map((key) => {
-        const s = secimler[key]!;
-        return [key, { name: s.file.name, size: s.file.size, type: s.file.type }];
-      }),
+      (Object.keys(secimler) as AlanKey[])
+        .filter((key) => secimler[key])
+        .map((key) => {
+          const s = secimler[key]!;
+          return [key, { name: s.file.name, size: s.file.size, type: s.file.type }];
+        }),
     );
     console.log("Kaza Bildir — Adım 2 (ruhsat & ehliyet):", meta);
 
@@ -208,25 +249,57 @@ export default function RuhsatEhliyetForm() {
       ruhsat: secimler.ruhsat!.file,
       ehliyetOn: secimler.ehliyetOn!.file,
       ehliyetArka: secimler.ehliyetArka!.file,
+      karsiTarafRuhsat: secimler.karsiTarafRuhsat?.file,
+      karsiTarafEhliyetOn: secimler.karsiTarafEhliyetOn?.file,
+      karsiTarafEhliyetArka: secimler.karsiTarafEhliyetArka?.file,
     });
     router.push("/kaza-bildir/yeni/kaza-raporu");
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="mt-7 space-y-6">
-      {ALANLAR.map((alan) => (
-        <FotoAlani
-          key={alan.key}
-          baslik={alan.baslik}
-          aciklama={alan.aciklama}
-          secim={secimler[alan.key]}
-          hata={dokunulan[alan.key] ? hatalar[alan.key] : undefined}
-          onSelect={(file) => handleSelect(alan.key, file)}
-          onClear={() => handleClear(alan.key)}
-        />
-      ))}
+    <form onSubmit={handleSubmit} noValidate className="mt-7">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-6">
+        {/* ========================= SİZİN BELGELERİNİZ ========================= */}
+        <div className="space-y-6">
+          <h2 className="text-[15px] font-semibold text-navy">
+            Sizin Belgeleriniz
+          </h2>
+          {SOL_ALANLAR.map((alan) => (
+            <FotoAlani
+              key={alan.key}
+              baslik={alan.baslik}
+              aciklama={alan.aciklama}
+              secim={secimler[alan.key]}
+              hata={dokunulan[alan.key] ? hatalar[alan.key] : undefined}
+              onSelect={(file) => handleSelect(alan.key, file)}
+              onClear={() => handleClear(alan.key)}
+            />
+          ))}
+        </div>
 
-      <div className="pt-1">
+        {/* ========================= KARŞI TARAF BELGELERİ ========================= */}
+        <div className="space-y-6">
+          <h2 className="text-[15px] font-semibold text-slate">
+            Karşı Taraf Belgeleri{" "}
+            <span className="text-[12px] font-normal text-slate/80">
+              (opsiyonel)
+            </span>
+          </h2>
+          {SAG_ALANLAR.map((alan) => (
+            <FotoAlani
+              key={alan.key}
+              baslik={alan.baslik}
+              aciklama={alan.aciklama}
+              secim={secimler[alan.key]}
+              hata={dokunulan[alan.key] ? hatalar[alan.key] : undefined}
+              onSelect={(file) => handleSelect(alan.key, file)}
+              onClear={() => handleClear(alan.key)}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-8 pt-1">
         <button
           type="submit"
           disabled={!gecerli}

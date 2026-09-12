@@ -4,9 +4,9 @@ import StepIndicator from "@/components/StepIndicator";
 import RuhsatEhliyetForm from "@/components/RuhsatEhliyetForm";
 
 export const metadata: Metadata = {
-  title: "Kaza Bildir · Ruhsat ve Ehliyet — Gökçe Hukuk Bürosu",
+  title: "Kaza Bildir · Ruhsat ve Ehliyet Bilgileri — Gökçe Hukuk Bürosu",
   description:
-    "Kaza bildiriminin ikinci adımı: araç ruhsatı ile sürücü belgenizin ön ve arka yüzü.",
+    "Kaza bildiriminin ikinci adımı: kendi araç ruhsatınız ve ehliyetiniz, varsa karşı tarafın belgeleri.",
 };
 
 export default function KazaBildirStep2() {
@@ -30,16 +30,16 @@ export default function KazaBildirStep2() {
       </header>
 
       {/* ============================= İÇERİK ========================== */}
-      <main className="mx-auto w-full max-w-[480px] px-5 py-10 sm:py-14">
+      <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-14">
         <StepIndicator current={2} />
 
         <div className="mt-10 rounded-card border border-line bg-paper p-6 sm:p-8">
           <h1 className="font-serif text-2xl font-medium text-navy sm:text-[1.75rem]">
-            Ruhsat ve ehliyetinizi yükleyin
+            Ruhsat ve Ehliyet Bilgileri
           </h1>
           <p className="mt-2 text-sm text-slate">
-            Aracınızın ruhsatı ile sürücü belgenizin ön ve arka yüzünü ekleyin —
-            toplam üç fotoğraf.
+            Kendi araç ruhsatınızı ve ehliyetinizi, varsa karşı tarafın
+            belgelerini de ekleyin.
           </p>
 
           <RuhsatEhliyetForm />

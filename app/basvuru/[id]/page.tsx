@@ -157,7 +157,11 @@ export default async function BasvuruDetay({
           <h2 className="font-serif text-xl font-medium text-navy">
             Ruhsat &amp; Ehliyet
           </h2>
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+
+          <h3 className="mt-5 text-[13px] font-semibold text-navy">
+            Sizin Belgeleriniz
+          </h3>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[
               { baslik: "Araç Ruhsatı", url: basvuru.ruhsatUrl },
               { baslik: "Ehliyet — Ön Yüz", url: basvuru.ehliyetOnUrl },
@@ -184,6 +188,53 @@ export default async function BasvuruDetay({
               </a>
             ))}
           </div>
+
+          <h3 className="mt-6 text-[13px] font-semibold text-slate">
+            Karşı Taraf Belgeleri
+          </h3>
+          {(() => {
+            const karsiTarafBelgeler = [
+              { baslik: "Karşı Taraf Araç Ruhsatı", url: basvuru.karsiTarafRuhsatUrl },
+              {
+                baslik: "Karşı Taraf Ehliyeti — Ön Yüz",
+                url: basvuru.karsiTarafEhliyetOnUrl,
+              },
+              {
+                baslik: "Karşı Taraf Ehliyeti — Arka Yüz",
+                url: basvuru.karsiTarafEhliyetArkaUrl,
+              },
+            ].filter((belge): belge is { baslik: string; url: string } => Boolean(belge.url));
+
+            if (karsiTarafBelgeler.length === 0) {
+              return <p className="mt-2 text-[13px] text-slate">Belge eklenmedi.</p>;
+            }
+
+            return (
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {karsiTarafBelgeler.map((belge) => (
+                  <a
+                    key={belge.baslik}
+                    href={belge.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block overflow-hidden rounded-[6px] border border-line"
+                  >
+                    <div className="aspect-square overflow-hidden bg-mist">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={belge.url}
+                        alt=""
+                        className="h-full w-full object-cover transition-transform duration-150 ease-out group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="px-2.5 py-2 text-[12px] text-slate group-hover:text-navy">
+                      {belge.baslik}
+                    </div>
+                  </a>
+                ))}
+              </div>
+            );
+          })()}
         </section>
 
         {/* Kaza raporu */}

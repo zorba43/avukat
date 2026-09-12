@@ -54,20 +54,27 @@ export async function sendKazaBildirimNotification({
   kazaTarihi,
   basvuruNiteligi,
   basvuruId,
+  karsiTarafVarMi,
 }: {
   isimSoyisim: string;
   telefon: string;
   kazaTarihi: string | Date;
   basvuruNiteligi: string;
   basvuruId: string;
+  /** true ise mesaja "Karşı Taraf Belgeleri: Yüklendi ✓" satırı eklenir; hiç yüklenmediyse satır hiç gösterilmez. */
+  karsiTarafVarMi?: boolean;
 }) {
+  const karsiTarafSatiri = karsiTarafVarMi
+    ? "\nKarşı Taraf Belgeleri: Yüklendi ✓"
+    : "";
+
   const message = `
 🚨 Yeni Kaza Bildirimi
 
 Ad Soyad: ${isimSoyisim}
 Telefon: ${formatTelefon(telefon)}
 Kaza Tarihi: ${formatTarih(kazaTarihi)}
-Başvuranın Niteliği: ${BASVURU_NITELIGI_ETIKETI[basvuruNiteligi] ?? basvuruNiteligi}
+Başvuranın Niteliği: ${BASVURU_NITELIGI_ETIKETI[basvuruNiteligi] ?? basvuruNiteligi}${karsiTarafSatiri}
 
 📎 Dosyalara erişmek için: ${process.env.NEXT_PUBLIC_SITE_URL}/basvuru/${basvuruId}
   `.trim();

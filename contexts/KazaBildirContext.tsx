@@ -27,6 +27,10 @@ export type Adim2Verisi = {
   ruhsat: File;
   ehliyetOn: File;
   ehliyetArka: File;
+  // Karşı taraf belgeleri — opsiyonel, kaza anında elde olmayabilir.
+  karsiTarafRuhsat?: File;
+  karsiTarafEhliyetOn?: File;
+  karsiTarafEhliyetArka?: File;
 };
 
 export type Adim5Verisi = {

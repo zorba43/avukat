@@ -16,6 +16,9 @@ type Govde = {
   ruhsatUrl: string;
   ehliyetOnUrl: string;
   ehliyetArkaUrl: string;
+  karsiTarafRuhsatUrl?: string;
+  karsiTarafEhliyetOnUrl?: string;
+  karsiTarafEhliyetArkaUrl?: string;
   kazaRaporuUrls: string[];
   fotograflarUrls: string[];
   kaynak: string;
@@ -79,6 +82,9 @@ export async function POST(request: Request) {
           ruhsatUrl: govde.ruhsatUrl!,
           ehliyetOnUrl: govde.ehliyetOnUrl!,
           ehliyetArkaUrl: govde.ehliyetArkaUrl!,
+          karsiTarafRuhsatUrl: govde.karsiTarafRuhsatUrl || null,
+          karsiTarafEhliyetOnUrl: govde.karsiTarafEhliyetOnUrl || null,
+          karsiTarafEhliyetArkaUrl: govde.karsiTarafEhliyetArkaUrl || null,
           kazaRaporuUrls: govde.kazaRaporuUrls!,
           fotograflarUrls: govde.fotograflarUrls!,
           kaynak: govde.kaynak!,
@@ -103,6 +109,11 @@ export async function POST(request: Request) {
       kazaTarihi: kayit.kazaTarihi,
       basvuruNiteligi: kayit.basvuruNiteligi,
       basvuruId: kayit.id,
+      karsiTarafVarMi: Boolean(
+        kayit.karsiTarafRuhsatUrl ||
+          kayit.karsiTarafEhliyetOnUrl ||
+          kayit.karsiTarafEhliyetArkaUrl,
+      ),
     });
   } catch (error) {
     // Telegram bildirimi başarısız olsa bile başvuru kaydedilmiş sayılır.

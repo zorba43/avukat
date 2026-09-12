@@ -32,6 +32,11 @@ model KazaBildirimi {
   ehliyetOnUrl   String
   ehliyetArkaUrl String
 
+  // Adım 2 — Karşı taraf belgeleri (opsiyonel — kaza anında elde olmayabilir)
+  karsiTarafRuhsatUrl      String?
+  karsiTarafEhliyetOnUrl   String?
+  karsiTarafEhliyetArkaUrl String?
+
   // Adım 3 — Kaza raporu belgeleri (1-5 adet, PDF veya görsel)
   kazaRaporuUrls String[]
 

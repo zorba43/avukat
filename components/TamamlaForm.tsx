@@ -79,28 +79,45 @@ export default function TamamlaForm() {
       // ki dosyalar aynı klasöre düşsün.
       const klasorOneki = basvuruKlasoru({ ad: adim1!.ad, createdAt: new Date(), id });
 
-      const [ruhsatUrl, ehliyetOnUrl, ehliyetArkaUrl, kazaRaporuUrls, fotograflarUrls] =
-        await Promise.all([
-          blobaYukle(adim2!.ruhsat, `${klasorOneki}/ruhsat/${adim2!.ruhsat.name}`),
-          blobaYukle(
-            adim2!.ehliyetOn,
-            `${klasorOneki}/ehliyet-on/${adim2!.ehliyetOn.name}`,
+      // Karşı taraf belgeleri opsiyonel — seçilmediyse hiç yüklenmez (undefined kalır).
+      const karsiTarafYukle = (file: File | undefined, altKlasor: string) =>
+        file
+          ? blobaYukle(file, `${klasorOneki}/karsi-taraf/${altKlasor}/${file.name}`)
+          : Promise.resolve(undefined);
+
+      const [
+        ruhsatUrl,
+        ehliyetOnUrl,
+        ehliyetArkaUrl,
+        kazaRaporuUrls,
+        fotograflarUrls,
+        karsiTarafRuhsatUrl,
+        karsiTarafEhliyetOnUrl,
+        karsiTarafEhliyetArkaUrl,
+      ] = await Promise.all([
+        blobaYukle(adim2!.ruhsat, `${klasorOneki}/ruhsat/${adim2!.ruhsat.name}`),
+        blobaYukle(
+          adim2!.ehliyetOn,
+          `${klasorOneki}/ehliyet-on/${adim2!.ehliyetOn.name}`,
+        ),
+        blobaYukle(
+          adim2!.ehliyetArka,
+          `${klasorOneki}/ehliyet-arka/${adim2!.ehliyetArka.name}`,
+        ),
+        Promise.all(
+          adim3.map((f, i) =>
+            blobaYukle(f, `${klasorOneki}/kaza-raporu/${i}-${f.name}`),
           ),
-          blobaYukle(
-            adim2!.ehliyetArka,
-            `${klasorOneki}/ehliyet-arka/${adim2!.ehliyetArka.name}`,
+        ),
+        Promise.all(
+          adim4.map((f, i) =>
+            blobaYukle(f, `${klasorOneki}/fotograflar/${i}-${f.name}`),
           ),
-          Promise.all(
-            adim3.map((f, i) =>
-              blobaYukle(f, `${klasorOneki}/kaza-raporu/${i}-${f.name}`),
-            ),
-          ),
-          Promise.all(
-            adim4.map((f, i) =>
-              blobaYukle(f, `${klasorOneki}/fotograflar/${i}-${f.name}`),
-            ),
-          ),
-        ]);
+        ),
+        karsiTarafYukle(adim2!.karsiTarafRuhsat, "ruhsat"),
+        karsiTarafYukle(adim2!.karsiTarafEhliyetOn, "ehliyet-on"),
+        karsiTarafYukle(adim2!.karsiTarafEhliyetArka, "ehliyet-arka"),
+      ]);
 
       const res = await fetch("/api/kaza-bildirimi", {
         method: "POST",
@@ -115,6 +132,9 @@ export default function TamamlaForm() {
           ruhsatUrl,
           ehliyetOnUrl,
           ehliyetArkaUrl,
+          karsiTarafRuhsatUrl,
+          karsiTarafEhliyetOnUrl,
+          karsiTarafEhliyetArkaUrl,
           kazaRaporuUrls,
           fotograflarUrls,
           kaynak: adim5Verisi.kaynak,
