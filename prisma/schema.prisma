@@ -17,10 +17,11 @@ model KazaBildirimi {
   createdAt  DateTime @default(now())
 
   // Adım 1 — Kişisel bilgiler
-  ad         String
-  telefon    String
-  kazaTarihi DateTime
-  kazaDurumu String
+  ad              String
+  telefon         String
+  kazaTarihi      DateTime
+  basvuruNiteligi String
+  kazaDurumu      String
 
   // Adım 2 — Ruhsat & Ehliyet (Blob URL'leri)
   ruhsatUrl      String

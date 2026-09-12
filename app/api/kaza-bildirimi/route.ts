@@ -9,6 +9,7 @@ type Govde = {
   ad: string;
   telefon: string;
   tarih: string;
+  basvuruNiteligi: string;
   kazaDurumu: string;
   ruhsatUrl: string;
   ehliyetOnUrl: string;
@@ -25,6 +26,7 @@ function eksikAlan(govde: Partial<Govde>) {
     "ad",
     "telefon",
     "tarih",
+    "basvuruNiteligi",
     "kazaDurumu",
     "ruhsatUrl",
     "ehliyetOnUrl",
@@ -65,6 +67,7 @@ export async function POST(request: Request) {
       ad: govde.ad!,
       telefon: govde.telefon!,
       kazaTarihi: new Date(govde.tarih!),
+      basvuruNiteligi: govde.basvuruNiteligi!,
       kazaDurumu: govde.kazaDurumu!,
       ruhsatUrl: govde.ruhsatUrl!,
       ehliyetOnUrl: govde.ehliyetOnUrl!,
@@ -81,6 +84,7 @@ export async function POST(request: Request) {
       isimSoyisim: kayit.ad,
       telefon: kayit.telefon,
       kazaTarihi: kayit.kazaTarihi,
+      basvuruNiteligi: kayit.basvuruNiteligi,
       basvuruId: kayit.id,
     });
   } catch (error) {

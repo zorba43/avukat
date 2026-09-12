@@ -109,6 +109,7 @@ export default function TamamlaForm() {
           ad: adim1!.ad,
           telefon: adim1!.telefon,
           tarih: adim1!.tarih,
+          basvuruNiteligi: adim1!.basvuruNiteligi,
           kazaDurumu: adim1!.kazaDurumu,
           ruhsatUrl,
           ehliyetOnUrl,

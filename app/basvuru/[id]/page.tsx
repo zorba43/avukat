@@ -24,6 +24,13 @@ function formatTarih(tarih: Date) {
   }).format(tarih);
 }
 
+const BASVURU_NITELIGI_ETIKETI: Record<string, string> = {
+  "arac-sahibi-kullanmadi": "Araç Sahibiyim ama aracı ben kullanmadım",
+  "arac-soforu": "Araç Şoförü",
+  "hem-sahibi-hem-soforu": "Hem araç sahibi hem araç şoförü",
+  yolcu: "Yolcu",
+};
+
 const KAZA_DURUMU_ETIKETI: Record<string, string> = {
   maddi: "Sadece maddi hasarlı",
   hafif: "Maddi hasarlı ve hafif yaralanma",
@@ -118,6 +125,13 @@ export default async function BasvuruDetay({
               <dt className="text-[13px] text-slate">Kaza Tarihi</dt>
               <dd className="mt-1 text-[15px] text-charcoal">
                 {formatTarih(basvuru.kazaTarihi)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[13px] text-slate">Başvuranın Niteliği</dt>
+              <dd className="mt-1 text-[15px] text-charcoal">
+                {BASVURU_NITELIGI_ETIKETI[basvuru.basvuruNiteligi] ??
+                  basvuru.basvuruNiteligi}
               </dd>
             </div>
             <div>

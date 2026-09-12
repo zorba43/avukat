@@ -4,7 +4,22 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useKazaBildir } from "@/contexts/KazaBildirContext";
 
-type FieldName = "ad" | "telefon" | "tarih" | "kazaDurumu";
+type FieldName =
+  | "ad"
+  | "telefon"
+  | "tarih"
+  | "basvuruNiteligi"
+  | "kazaDurumu";
+
+const BASVURU_NITELIGI_SECENEKLERI = [
+  {
+    value: "arac-sahibi-kullanmadi",
+    label: "Araç Sahibiyim ama aracı ben kullanmadım",
+  },
+  { value: "arac-soforu", label: "Araç Şoförü" },
+  { value: "hem-sahibi-hem-soforu", label: "Hem araç sahibi hem araç şoförü" },
+  { value: "yolcu", label: "Yolcu" },
+];
 
 const KAZA_DURUMU_SECENEKLERI = [
   { value: "maddi", label: "Sadece maddi hasarlı" },
@@ -46,11 +61,15 @@ export default function KisiselBilgiForm() {
     adim1 ? formatPhone(adim1.telefon) : "",
   );
   const [tarih, setTarih] = useState(adim1?.tarih ?? "");
+  const [basvuruNiteligi, setBasvuruNiteligi] = useState(
+    adim1?.basvuruNiteligi ?? "",
+  );
   const [kazaDurumu, setKazaDurumu] = useState(adim1?.kazaDurumu ?? "");
   const [touched, setTouched] = useState<Record<FieldName, boolean>>({
     ad: false,
     telefon: false,
     tarih: false,
+    basvuruNiteligi: false,
     kazaDurumu: false,
   });
 
@@ -72,12 +91,16 @@ export default function KisiselBilgiForm() {
       e.tarih = "İleri bir tarih seçilemez.";
     }
 
+    if (!basvuruNiteligi) {
+      e.basvuruNiteligi = "Lütfen başvuranın niteliğini seçin";
+    }
+
     if (!kazaDurumu) {
       e.kazaDurumu = "Kaza durumunu seçin.";
     }
 
     return e;
-  }, [ad, telefon, tarih, kazaDurumu, today]);
+  }, [ad, telefon, tarih, basvuruNiteligi, kazaDurumu, today]);
 
   const isValid = Object.keys(errors).length === 0;
 
@@ -95,6 +118,7 @@ export default function KisiselBilgiForm() {
       ad: ad.trim(),
       telefon: telefon.replace(/\D/g, ""),
       tarih,
+      basvuruNiteligi,
       kazaDurumu,
     };
     console.log("Kaza Bildir — Adım 1 (kişisel bilgiler):", data);
@@ -182,6 +206,64 @@ export default function KisiselBilgiForm() {
           </p>
         )}
       </div>
+
+      {/* Başvuranın Niteliği */}
+      <fieldset
+        onBlur={() => markTouched("basvuruNiteligi")}
+        aria-invalid={errorFor("basvuruNiteligi") ? true : undefined}
+        aria-describedby={
+          errorFor("basvuruNiteligi") ? "basvuruNiteligi-error" : undefined
+        }
+      >
+        <legend className="text-[13px] text-slate">Başvuranın Niteliği</legend>
+        <div className="mt-1.5 space-y-2.5">
+          {BASVURU_NITELIGI_SECENEKLERI.map((secenek) => {
+            const secili = basvuruNiteligi === secenek.value;
+            return (
+              <label
+                key={secenek.value}
+                className={[
+                  "flex cursor-pointer items-center gap-3 rounded-[6px] border px-4 py-3 text-[15px]",
+                  "transition-colors duration-150 ease-out",
+                  "focus-within:ring-2 focus-within:ring-navy/10",
+                  secili
+                    ? "border-navy bg-mist font-medium text-navy"
+                    : "border-line bg-paper text-charcoal hover:border-slate",
+                ].join(" ")}
+              >
+                <input
+                  type="radio"
+                  name="basvuruNiteligi"
+                  value={secenek.value}
+                  checked={secili}
+                  onChange={(e) => setBasvuruNiteligi(e.target.value)}
+                  className="sr-only"
+                />
+                <span
+                  aria-hidden="true"
+                  className={[
+                    "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                    secili ? "border-navy" : "border-line",
+                  ].join(" ")}
+                >
+                  {secili && (
+                    <span className="h-2 w-2 rounded-full bg-navy" />
+                  )}
+                </span>
+                {secenek.label}
+              </label>
+            );
+          })}
+        </div>
+        {errorFor("basvuruNiteligi") && (
+          <p
+            id="basvuruNiteligi-error"
+            className="mt-1.5 text-[13px] text-urgent"
+          >
+            {errorFor("basvuruNiteligi")}
+          </p>
+        )}
+      </fieldset>
 
       {/* Kaza Durumu */}
       <fieldset

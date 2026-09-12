@@ -17,15 +17,25 @@ function formatTarih(tarih: string | Date) {
   }).format(d);
 }
 
+/** Kayıttaki kısa kodu (bkz. KisiselBilgiForm) okunur Türkçe etikete çevirir. */
+const BASVURU_NITELIGI_ETIKETI: Record<string, string> = {
+  "arac-sahibi-kullanmadi": "Araç Sahibiyim ama aracı ben kullanmadım",
+  "arac-soforu": "Araç Şoförü",
+  "hem-sahibi-hem-soforu": "Hem araç sahibi hem araç şoförü",
+  yolcu: "Yolcu",
+};
+
 export async function sendKazaBildirimNotification({
   isimSoyisim,
   telefon,
   kazaTarihi,
+  basvuruNiteligi,
   basvuruId,
 }: {
   isimSoyisim: string;
   telefon: string;
   kazaTarihi: string | Date;
+  basvuruNiteligi: string;
   basvuruId: string;
 }) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -44,6 +54,7 @@ export async function sendKazaBildirimNotification({
 Ad Soyad: ${isimSoyisim}
 Telefon: ${formatTelefon(telefon)}
 Kaza Tarihi: ${formatTarih(kazaTarihi)}
+Başvuranın Niteliği: ${BASVURU_NITELIGI_ETIKETI[basvuruNiteligi] ?? basvuruNiteligi}
 
 📎 Dosyalara erişmek için: ${process.env.NEXT_PUBLIC_SITE_URL}/basvuru/${basvuruId}
   `.trim();

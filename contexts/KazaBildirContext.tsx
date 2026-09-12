@@ -19,6 +19,7 @@ export type Adim1Verisi = {
   ad: string;
   telefon: string;
   tarih: string;
+  basvuruNiteligi: string;
   kazaDurumu: string;
 };
 
