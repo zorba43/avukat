@@ -21,10 +21,7 @@ export default function KazaBildirStep4() {
             className="flex items-center gap-2.5"
             aria-label="Gökçe Hukuk Bürosu — ana sayfa"
           >
-            <Image src="/logo.png" alt="" width={633} height={507} className="h-8 w-auto sm:h-9" />
-            <span className="whitespace-nowrap font-serif text-base font-medium text-navy sm:text-lg">
-              Gökçe Hukuk Bürosu
-            </span>
+            <Image src="/logo.png" alt="" width={705} height={174} className="h-10 w-auto" />
           </Link>
         </div>
       </header>

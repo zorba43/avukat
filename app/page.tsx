@@ -141,14 +141,11 @@ export default function Home() {
             <Image
               src="/logo.png"
               alt=""
-              width={633}
-              height={507}
+              width={705}
+              height={174}
               priority
-              className="h-8 w-auto sm:h-9 md:h-10"
+              className="h-10 w-auto md:h-11"
             />
-            <span className="whitespace-nowrap font-serif text-base font-medium text-navy sm:text-lg md:text-xl">
-              Gökçe Hukuk Bürosu
-            </span>
           </Link>
 
           {/* Orta: nav — header genişliğinde tam ortalanmış (md ve üstü) */}
@@ -388,10 +385,15 @@ export default function Home() {
           {/* İletişim */}
           <div>
             <div className="flex items-center gap-2.5">
-              <Image src="/logo.png" alt="" width={633} height={507} className="h-9 w-auto" />
-              <span className="font-serif text-lg font-medium text-white">
-                Gökçe Hukuk Bürosu
-              </span>
+              {/* Logo lacivert renkte — koyu (navy-deep) footer zemininde
+                  görünür olması için beyaza çevrilir (brightness-0 + invert). */}
+              <Image
+                src="/logo.png"
+                alt="Gökçe Hukuk Bürosu"
+                width={705}
+                height={174}
+                className="h-10 w-auto brightness-0 invert"
+              />
             </div>
 
             <dl className="mt-8 space-y-4 text-sm">
