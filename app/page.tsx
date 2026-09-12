@@ -86,6 +86,19 @@ const STATS = [
   { value: "%0", label: "ön ücret" },
 ];
 
+/**
+ * Güven çubuğundaki referans/paydaş logoları. Koyu (--navy) zeminde siyah
+ * ağırlıklı öğeleri okunaksız hale gelen logolar (ref-1, ref-2) beyaz bir
+ * "chip" içine alınır; zaten açık/kontrastlı duran logolar (ref-3, ref-4)
+ * doğrudan kullanılır.
+ */
+const REFERANS_LOGOLARI = [
+  { src: "/logos/ref-1.png", alt: "Akdeniz Motosikletli Kuryeler Federasyonu", width: 82, height: 96, chip: true },
+  { src: "/logos/ref-2.png", alt: "Antalya Motosikletli Kuryeler Derneği (ANMOKDER)", width: 86, height: 96, chip: true },
+  { src: "/logos/ref-3.png", alt: "Hayat Motorcuya Güzel", width: 174, height: 96, chip: false },
+  { src: "/logos/ref-4.png", alt: "Antalya Barosu 100. Yıl", width: 95, height: 96, chip: false },
+];
+
 const STEPS = [
   {
     n: "01",
@@ -263,15 +276,41 @@ export default function Home() {
 
       {/* ========================== GÜVEN ÇUBUĞU ======================== */}
       <section className="border-b border-line bg-navy">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-y-8 px-5 py-10 md:grid-cols-4 md:px-8">
-          {STATS.map((s) => (
-            <div key={s.label} className="text-center md:text-left">
-              <div className="font-serif text-3xl font-medium text-white md:text-4xl">
-                {s.value}
+        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-5 py-10 md:flex-row md:items-center md:justify-between md:px-8">
+          {/* İstatistikler */}
+          <div className="grid grid-cols-2 gap-y-8 gap-x-4 md:grid-cols-4 md:gap-x-10">
+            {STATS.map((s) => (
+              <div key={s.label} className="text-center md:text-left">
+                <div className="font-serif text-3xl font-medium text-white md:text-4xl">
+                  {s.value}
+                </div>
+                <div className="mt-1 text-sm text-white/60">{s.label}</div>
               </div>
-              <div className="mt-1 text-sm text-white/60">{s.label}</div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* Referans logoları */}
+          <div className="flex flex-wrap items-center justify-center gap-6 border-t border-white/10 pt-8 md:flex-nowrap md:justify-end md:gap-8 md:border-t-0 md:pt-0">
+            {REFERANS_LOGOLARI.map((logo) =>
+              logo.chip ? (
+                <div
+                  key={logo.src}
+                  className="flex items-center justify-center rounded-[6px] bg-white px-2.5 py-2"
+                >
+                  <Image src={logo.src} alt={logo.alt} width={logo.width} height={logo.height} className="h-8 w-auto" />
+                </div>
+              ) : (
+                <Image
+                  key={logo.src}
+                  src={logo.src}
+                  alt={logo.alt}
+                  width={logo.width}
+                  height={logo.height}
+                  className="h-8 w-auto"
+                />
+              ),
+            )}
+          </div>
         </div>
       </section>
 
