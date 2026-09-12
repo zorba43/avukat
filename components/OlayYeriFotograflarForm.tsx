@@ -56,14 +56,14 @@ export default function OlayYeriFotograflarForm() {
 
     if (reddedilen > 0 && kapasiteAsimi > 0) {
       setUyari(
-        `${reddedilen} dosya desteklenmiyor veya çok büyük, ${kapasiteAsimi} dosya ise 20 fotoğraf sınırı nedeniyle eklenmedi.`,
+        `${reddedilen} dosya desteklenmiyor veya çok büyük, ${kapasiteAsimi} dosya ise ${MAX_FOTO} fotoğraf sınırı nedeniyle eklenmedi.`,
       );
     } else if (reddedilen > 0) {
       setUyari(
         `${reddedilen} dosya desteklenmiyor veya 10 MB sınırını aşıyor, eklenmedi.`,
       );
     } else if (kapasiteAsimi > 0) {
-      setUyari(`En fazla 20 fotoğraf eklenebilir, ${kapasiteAsimi} dosya eklenmedi.`);
+      setUyari(`En fazla ${MAX_FOTO} fotoğraf eklenebilir, ${kapasiteAsimi} dosya eklenmedi.`);
     } else {
       setUyari(null);
     }
@@ -88,7 +88,7 @@ export default function OlayYeriFotograflarForm() {
     console.log("Kaza Bildir — Adım 4 (olay yeri fotoğrafları):", meta);
 
     setAdim4(dosyalar);
-    router.push("/kaza-bildir/tamamla");
+    router.push("/kaza-bildir/yeni/tamamla");
   }
 
   return (

@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import StepIndicator from "@/components/StepIndicator";
-import KazaRaporuForm from "@/components/KazaRaporuForm";
+import RuhsatEhliyetForm from "@/components/RuhsatEhliyetForm";
 
 export const metadata: Metadata = {
-  title: "Kaza Bildir · Kaza Raporu — Gökçe Hukuk Bürosu",
+  title: "Kaza Bildir · Ruhsat ve Ehliyet — Gökçe Hukuk Bürosu",
   description:
-    "Kaza bildiriminin üçüncü adımı: kaza tespit tutanağı ve varsa ek belgeler.",
+    "Kaza bildiriminin ikinci adımı: araç ruhsatı ile sürücü belgenizin ön ve arka yüzü.",
 };
 
-export default function KazaBildirStep3() {
+export default function KazaBildirStep2() {
   return (
     <div className="min-h-screen bg-mist">
       {/* ============================ HEADER ============================ */}
@@ -31,23 +31,23 @@ export default function KazaBildirStep3() {
 
       {/* ============================= İÇERİK ========================== */}
       <main className="mx-auto w-full max-w-[480px] px-5 py-10 sm:py-14">
-        <StepIndicator current={3} />
+        <StepIndicator current={2} />
 
         <div className="mt-10 rounded-card border border-line bg-paper p-6 sm:p-8">
           <h1 className="font-serif text-2xl font-medium text-navy sm:text-[1.75rem]">
-            Kaza raporunu yükleyin
+            Ruhsat ve ehliyetinizi yükleyin
           </h1>
           <p className="mt-2 text-sm text-slate">
-            Kaza tespit tutanağı ile varsa ek belgeleri ekleyin. Her alana PDF
-            veya fotoğraf yükleyebilirsiniz; en az bir belge yeterli.
+            Aracınızın ruhsatı ile sürücü belgenizin ön ve arka yüzünü ekleyin —
+            toplam üç fotoğraf.
           </p>
 
-          <KazaRaporuForm />
+          <RuhsatEhliyetForm />
         </div>
 
         <div className="mt-8 text-center">
           <Link
-            href="/kaza-bildir/ruhsat-ehliyet"
+            href="/kaza-bildir/yeni"
             className="text-sm text-slate transition-colors duration-150 ease-out hover:text-navy"
           >
             ← Önceki adım

@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import StepIndicator from "@/components/StepIndicator";
-import RuhsatEhliyetForm from "@/components/RuhsatEhliyetForm";
+import EkBelgeForm from "@/components/EkBelgeForm";
 
 export const metadata: Metadata = {
-  title: "Kaza Bildir · Ruhsat ve Ehliyet — Gökçe Hukuk Bürosu",
+  title: "Ek Belge Yükle — Gökçe Hukuk Bürosu",
   description:
-    "Kaza bildiriminin ikinci adımı: araç ruhsatı ile sürücü belgenizin ön ve arka yüzü.",
+    "Daha önce yaptığınız kaza bildirimine başvuru numaranızla eksik kalan kaza raporu ya da fotoğrafları ekleyin.",
 };
 
-export default function KazaBildirStep2() {
+export default function EkBelgeSayfasi() {
   return (
     <div className="min-h-screen bg-mist">
       {/* ============================ HEADER ============================ */}
@@ -31,18 +30,20 @@ export default function KazaBildirStep2() {
 
       {/* ============================= İÇERİK ========================== */}
       <main className="mx-auto w-full max-w-[480px] px-5 py-10 sm:py-14">
-        <StepIndicator current={2} />
+        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-amber">
+          Ek Belge Yükle
+        </span>
 
-        <div className="mt-10 rounded-card border border-line bg-paper p-6 sm:p-8">
+        <div className="mt-4 rounded-card border border-line bg-paper p-6 sm:p-8">
           <h1 className="font-serif text-2xl font-medium text-navy sm:text-[1.75rem]">
-            Ruhsat ve ehliyetinizi yükleyin
+            Başvurunuzu bulalım
           </h1>
           <p className="mt-2 text-sm text-slate">
-            Aracınızın ruhsatı ile sürücü belgenizin ön ve arka yüzünü ekleyin —
-            toplam üç fotoğraf.
+            Başvuru numaranız ve telefon numaranızın son 4 hanesiyle mevcut
+            başvurunuza kaza raporu ya da fotoğraf ekleyebilirsiniz.
           </p>
 
-          <RuhsatEhliyetForm />
+          <EkBelgeForm />
         </div>
 
         <div className="mt-8 text-center">
@@ -50,7 +51,7 @@ export default function KazaBildirStep2() {
             href="/kaza-bildir"
             className="text-sm text-slate transition-colors duration-150 ease-out hover:text-navy"
           >
-            ← Önceki adım
+            ← Geri dön
           </Link>
         </div>
       </main>

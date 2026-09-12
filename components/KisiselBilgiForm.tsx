@@ -124,7 +124,7 @@ export default function KisiselBilgiForm() {
     console.log("Kaza Bildir — Adım 1 (kişisel bilgiler):", data);
 
     setAdim1(data);
-    router.push("/kaza-bildir/ruhsat-ehliyet");
+    router.push("/kaza-bildir/yeni/ruhsat-ehliyet");
   }
 
   return (

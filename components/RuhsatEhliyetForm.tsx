@@ -209,7 +209,7 @@ export default function RuhsatEhliyetForm() {
       ehliyetOn: secimler.ehliyetOn!.file,
       ehliyetArka: secimler.ehliyetArka!.file,
     });
-    router.push("/kaza-bildir/kaza-raporu");
+    router.push("/kaza-bildir/yeni/kaza-raporu");
   }
 
   return (

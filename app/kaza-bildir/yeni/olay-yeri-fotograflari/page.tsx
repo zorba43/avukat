@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import StepIndicator from "@/components/StepIndicator";
-import TamamlaForm from "@/components/TamamlaForm";
+import OlayYeriFotograflarForm from "@/components/OlayYeriFotograflarForm";
 
 export const metadata: Metadata = {
-  title: "Kaza Bildir · Tamamla — Gökçe Hukuk Bürosu",
-  description: "Kaza bildiriminin son adımı: bize nasıl ulaştığınızı belirtin.",
+  title: "Kaza Bildir · Olay Yeri Fotoğrafları — Gökçe Hukuk Bürosu",
+  description:
+    "Kaza bildiriminin son adımı: olay yerinden en az 3, en fazla 20 fotoğraf.",
 };
 
-export default function KazaBildirStep5() {
+export default function KazaBildirStep4() {
   return (
     <div className="min-h-screen bg-mist">
       {/* ============================ HEADER ============================ */}
@@ -30,23 +31,23 @@ export default function KazaBildirStep5() {
 
       {/* ============================= İÇERİK ========================== */}
       <main className="mx-auto w-full max-w-[480px] px-5 py-10 sm:py-14">
-        <StepIndicator current={5} />
+        <StepIndicator current={4} />
 
         <div className="mt-10 rounded-card border border-line bg-paper p-6 sm:p-8">
           <h1 className="font-serif text-2xl font-medium text-navy sm:text-[1.75rem]">
-            Son bir soru
+            Olay yeri fotoğraflarını ekleyin
           </h1>
           <p className="mt-2 text-sm text-slate">
-            Bildiriminizi tamamlamadan önce, bize nasıl ulaştığınızı öğrenmek
-            isteriz.
+            Aracın ve kaza yerinin fotoğraflarını ekleyin — en az 3, en fazla 20
+            fotoğraf.
           </p>
 
-          <TamamlaForm />
+          <OlayYeriFotograflarForm />
         </div>
 
         <div className="mt-8 text-center">
           <Link
-            href="/kaza-bildir/olay-yeri-fotograflari"
+            href="/kaza-bildir/yeni/kaza-raporu"
             className="text-sm text-slate transition-colors duration-150 ease-out hover:text-navy"
           >
             ← Önceki adım

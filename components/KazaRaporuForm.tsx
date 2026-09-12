@@ -198,7 +198,7 @@ export default function KazaRaporuForm() {
     console.log("Kaza Bildir — Adım 3 (kaza raporu):", meta);
 
     setAdim3(dosyalar);
-    router.push("/kaza-bildir/olay-yeri-fotograflari");
+    router.push("/kaza-bildir/yeni/olay-yeri-fotograflari");
   }
 
   return (

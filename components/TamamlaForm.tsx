@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { useKazaBildir } from "@/contexts/KazaBildirContext";
-import { slugifyIsim } from "@/lib/slug";
+import { basvuruKlasoru } from "@/lib/basvuru";
 
 const KAYNAK_SECENEKLERI = [
   { value: "sosyal", label: "Sosyal Medya" },
@@ -31,12 +31,14 @@ export default function TamamlaForm() {
   const [gonderiliyor, setGonderiliyor] = useState(false);
   const [gonderimHatasi, setGonderimHatasi] = useState<string | null>(null);
   const [gonderildi, setGonderildi] = useState(false);
+  const [basvuruNo, setBasvuruNo] = useState<string | null>(null);
+  const [kopyalandi, setKopyalandi] = useState(false);
 
   // Sayfa doğrudan açıldıysa ya da yenilendiyse (context sıfırlanır) önceki
   // adımlar eksik demektir — akışı baştan başlat.
   useEffect(() => {
     if (!adim1 || !adim2 || adim3.length === 0 || adim4.length < 3) {
-      router.replace("/kaza-bildir");
+      router.replace("/kaza-bildir/yeni");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -71,12 +73,11 @@ export default function TamamlaForm() {
       // edilemez parçası. Tam UUID olarak kalır, hiçbir yerde kısaltılmaz.
       const id = crypto.randomUUID();
 
-      // Blob'daki klasör adı ise okunabilir olsun diye isim + tarih + id'nin
-      // ilk 6 karakterinden oluşur (örn. ahmet-yilmaz-2026-09-11-a3f9c1).
-      // Aynı isim + aynı gün çakışsa bile kısa kod tekilliği sağlar.
-      const bugun = new Date().toISOString().slice(0, 10);
-      const kisaKod = id.slice(0, 6);
-      const klasorOneki = `basvurular/${slugifyIsim(adim1!.ad)}-${bugun}-${kisaKod}`;
+      // Blob'daki klasör adı okunabilir olsun diye isim + tarih + id'nin ilk 6
+      // karakterinden oluşur (örn. ahmet-yilmaz-2026-09-11-a3f9c1). Aynı formül
+      // (bkz. lib/basvuru.ts) ek belge yüklerken sunucu tarafında da kullanılır
+      // ki dosyalar aynı klasöre düşsün.
+      const klasorOneki = basvuruKlasoru({ ad: adim1!.ad, createdAt: new Date(), id });
 
       const [ruhsatUrl, ehliyetOnUrl, ehliyetArkaUrl, kazaRaporuUrls, fotograflarUrls] =
         await Promise.all([
@@ -121,11 +122,13 @@ export default function TamamlaForm() {
         }),
       });
 
+      const govde = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        const govde = await res.json().catch(() => ({}));
         throw new Error(govde.error || "Gönderim başarısız oldu.");
       }
 
+      setBasvuruNo(govde.basvuruNo ?? null);
       setGonderildi(true);
     } catch (err) {
       console.error("Kaza Bildir — gönderim hatası:", err);
@@ -165,6 +168,54 @@ export default function TamamlaForm() {
         <p className="max-w-[32ch] text-sm text-slate">
           Dosyalarınızı inceleyip en kısa sürede sizinle iletişime geçeceğiz.
         </p>
+
+        {basvuruNo && (
+          <>
+            <div className="mt-2 w-full rounded-card border border-line bg-mist p-5">
+              <p className="text-[13px] text-slate">Başvuru Numaranız</p>
+              <div className="mt-1.5 flex flex-wrap items-center justify-center gap-3">
+                <span className="font-serif text-2xl font-medium tracking-wide text-navy">
+                  {basvuruNo}
+                </span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(basvuruNo);
+                      setKopyalandi(true);
+                      setTimeout(() => setKopyalandi(false), 2000);
+                    } catch {
+                      // Pano API'si kullanılamıyorsa sessizce yoksay.
+                    }
+                  }}
+                  className="flex items-center gap-1.5 rounded-[6px] border border-line bg-paper px-3 py-1.5 text-[13px] font-medium text-navy transition-colors duration-150 ease-out hover:border-slate"
+                >
+                  {kopyalandi ? (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="9" y="9" width="12" height="12" rx="2" />
+                      <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+                    </svg>
+                  )}
+                  {kopyalandi ? "Kopyalandı" : "Kopyala"}
+                </button>
+              </div>
+            </div>
+
+            <div className="w-full rounded-card bg-navy-deep p-4">
+              <p className="text-[13px] font-bold uppercase tracking-wide text-white">
+                Lütfen başvuru numaranızı kaydediniz
+              </p>
+              <p className="mt-1 text-[13px] text-white/70">
+                Ek belge yüklemek istediğinizde bu numarayı kullanacaksınız.
+              </p>
+            </div>
+          </>
+        )}
+
         <Link
           href="/"
           className="mt-2 text-sm font-medium text-navy underline decoration-line underline-offset-4 transition-colors duration-150 ease-out hover:decoration-navy"

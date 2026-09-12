@@ -97,7 +97,9 @@ export default async function BasvuruDetay({
           Kaza Bildirimi Detayı
         </h1>
         <p className="mt-2 text-sm text-slate">
-          Bildirim tarihi: {formatTarih(basvuru.createdAt)}
+          Başvuru No:{" "}
+          <span className="font-medium text-charcoal">{basvuru.basvuruNo}</span>
+          {" · "}Bildirim tarihi: {formatTarih(basvuru.createdAt)}
         </p>
 
         {/* Kişisel bilgiler */}

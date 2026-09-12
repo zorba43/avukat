@@ -14,6 +14,10 @@ datasource db {
 /// tahmin edilemez parçası olarak aynı değer kullanılır.
 model KazaBildirimi {
   id         String   @id
+  /// Kullanıcıya gösterilen kısa/okunabilir kod (örn. GH-2026-4821) — id
+  /// (UUID) ile karıştırılmamalı. Ek belge yükleme akışında başvuruyu bulmak
+  /// için isim yerine bu kullanılır.
+  basvuruNo  String   @unique
   createdAt  DateTime @default(now())
 
   // Adım 1 — Kişisel bilgiler

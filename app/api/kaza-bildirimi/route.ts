@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { sendKazaBildirimNotification } from "@/lib/telegram";
+import { uretBasvuruNo } from "@/lib/basvuru";
 
 export const runtime = "nodejs";
 
@@ -61,23 +63,38 @@ export async function POST(request: Request) {
     );
   }
 
-  const kayit = await prisma.kazaBildirimi.create({
-    data: {
-      id: govde.id!,
-      ad: govde.ad!,
-      telefon: govde.telefon!,
-      kazaTarihi: new Date(govde.tarih!),
-      basvuruNiteligi: govde.basvuruNiteligi!,
-      kazaDurumu: govde.kazaDurumu!,
-      ruhsatUrl: govde.ruhsatUrl!,
-      ehliyetOnUrl: govde.ehliyetOnUrl!,
-      ehliyetArkaUrl: govde.ehliyetArkaUrl!,
-      kazaRaporuUrls: govde.kazaRaporuUrls!,
-      fotograflarUrls: govde.fotograflarUrls!,
-      kaynak: govde.kaynak!,
-      kaynakDetay: govde.kaynakDetay || null,
-    },
-  });
+  // basvuruNo çakışırsa (Prisma P2002, @unique) birkaç kez yeniden üretip dener.
+  let kayit;
+  for (let deneme = 0; ; deneme++) {
+    try {
+      kayit = await prisma.kazaBildirimi.create({
+        data: {
+          id: govde.id!,
+          basvuruNo: uretBasvuruNo(),
+          ad: govde.ad!,
+          telefon: govde.telefon!,
+          kazaTarihi: new Date(govde.tarih!),
+          basvuruNiteligi: govde.basvuruNiteligi!,
+          kazaDurumu: govde.kazaDurumu!,
+          ruhsatUrl: govde.ruhsatUrl!,
+          ehliyetOnUrl: govde.ehliyetOnUrl!,
+          ehliyetArkaUrl: govde.ehliyetArkaUrl!,
+          kazaRaporuUrls: govde.kazaRaporuUrls!,
+          fotograflarUrls: govde.fotograflarUrls!,
+          kaynak: govde.kaynak!,
+          kaynakDetay: govde.kaynakDetay || null,
+        },
+      });
+      break;
+    } catch (error) {
+      const carpisma =
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002" &&
+        (error.meta?.target as string[] | undefined)?.includes("basvuruNo");
+      if (carpisma && deneme < 5) continue;
+      throw error;
+    }
+  }
 
   try {
     await sendKazaBildirimNotification({
@@ -92,5 +109,5 @@ export async function POST(request: Request) {
     console.error("Telegram bildirimi gönderilirken hata:", error);
   }
 
-  return NextResponse.json({ id: kayit.id });
+  return NextResponse.json({ id: kayit.id, basvuruNo: kayit.basvuruNo });
 }
