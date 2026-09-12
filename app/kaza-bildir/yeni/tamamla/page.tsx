@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import StepIndicator from "@/components/StepIndicator";
 import TamamlaForm from "@/components/TamamlaForm";
@@ -19,8 +20,7 @@ export default function KazaBildirStep5() {
             className="flex items-center gap-2.5"
             aria-label="Gökçe Hukuk Bürosu — ana sayfa"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-mark.svg" alt="" className="h-8 w-auto sm:h-9" />
+            <Image src="/logo.png" alt="" width={633} height={507} className="h-8 w-auto sm:h-9" />
             <span className="whitespace-nowrap font-serif text-base font-medium text-navy sm:text-lg">
               Gökçe Hukuk Bürosu
             </span>

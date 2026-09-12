@@ -1,6 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import { FaLinkedin, FaInstagram, FaYoutube, FaGlobeAmericas } from "react-icons/fa";
 import CtaButton from "@/components/CtaButton";
+import SosyalRozet from "@/components/SosyalRozet";
+import MobilNavMenu from "@/components/MobilNavMenu";
 
 const PHONE_DISPLAY = "+90 (533) 427 55 73";
 const PHONE_HREF = "tel:+905334275573";
@@ -122,45 +125,6 @@ const TRUST = [
   },
 ];
 
-/**
- * Sosyal medya / web sitesi rozeti — dairesel, marka rengi zeminli, hafif
- * kabartma gölgeli. Hover'da ölçek + gölge büyür (0.15s, abartısız).
- */
-function SosyalRozet({
-  href,
-  label,
-  className,
-  children,
-  internal = false,
-}: {
-  href: string;
-  label: string;
-  className: string;
-  children: React.ReactNode;
-  internal?: boolean;
-}) {
-  const rozetSinifi = [
-    "flex h-[30px] w-[30px] items-center justify-center rounded-full",
-    "shadow-[0_2px_6px_rgba(0,0,0,0.15)] transition-transform duration-150 ease-out",
-    "hover:scale-[1.08] hover:shadow-[0_4px_10px_rgba(0,0,0,0.2)]",
-    className,
-  ].join(" ");
-
-  if (internal) {
-    return (
-      <Link href={href} aria-label={label} className={rozetSinifi}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <a href={href} aria-label={label} className={rozetSinifi}>
-      {children}
-    </a>
-  );
-}
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-paper">
@@ -174,8 +138,14 @@ export default function Home() {
             className="col-start-1 flex items-center justify-self-start gap-2.5"
             aria-label="Gökçe Hukuk Bürosu — ana sayfa"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-mark.svg" alt="" className="h-8 w-auto sm:h-9 md:h-10" />
+            <Image
+              src="/logo.png"
+              alt=""
+              width={633}
+              height={507}
+              priority
+              className="h-8 w-auto sm:h-9 md:h-10"
+            />
             <span className="whitespace-nowrap font-serif text-base font-medium text-navy sm:text-lg md:text-xl">
               Gökçe Hukuk Bürosu
             </span>
@@ -231,20 +201,31 @@ export default function Home() {
               className="flex shrink-0 items-center gap-2 whitespace-nowrap text-sm font-medium text-navy md:text-base"
               aria-label={`Telefon: ${PHONE_DISPLAY}`}
             >
-              <svg
-                className="h-4 w-4 shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+              <span
+                className={[
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-navy text-white",
+                  "border border-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.12)]",
+                  "transition-[transform,box-shadow] duration-150 ease-out",
+                  "hover:scale-[1.08] hover:shadow-[0_4px_14px_rgba(0,0,0,0.18)]",
+                ].join(" ")}
               >
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
-              </svg>
+                <svg
+                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </span>
               <span className="hidden sm:inline">{PHONE_DISPLAY}</span>
             </a>
+
+            <MobilNavMenu />
           </div>
         </div>
       </header>
@@ -407,8 +388,7 @@ export default function Home() {
           {/* İletişim */}
           <div>
             <div className="flex items-center gap-2.5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-mark.svg" alt="" className="h-9 w-auto" />
+              <Image src="/logo.png" alt="" width={633} height={507} className="h-9 w-auto" />
               <span className="font-serif text-lg font-medium text-white">
                 Gökçe Hukuk Bürosu
               </span>
