@@ -93,10 +93,10 @@ const STATS = [
  * doğrudan kullanılır.
  */
 const REFERANS_LOGOLARI = [
-  { src: "/logos/ref-1.png", alt: "Akdeniz Motosikletli Kuryeler Federasyonu", width: 82, height: 96, chip: true },
-  { src: "/logos/ref-2.png", alt: "Antalya Motosikletli Kuryeler Derneği (ANMOKDER)", width: 86, height: 96, chip: true },
-  { src: "/logos/ref-3.png", alt: "Hayat Motorcuya Güzel", width: 174, height: 96, chip: false },
-  { src: "/logos/ref-4.png", alt: "Antalya Barosu 100. Yıl", width: 95, height: 96, chip: false },
+  { src: "/logos/ref-1.png", alt: "Akdeniz Motosikletli Kuryeler Federasyonu", width: 124, height: 144, chip: true },
+  { src: "/logos/ref-2.png", alt: "Antalya Motosikletli Kuryeler Derneği (ANMOKDER)", width: 129, height: 144, chip: true },
+  { src: "/logos/ref-3.png", alt: "Hayat Motorcuya Güzel", width: 261, height: 144, chip: false },
+  { src: "/logos/ref-4.png", alt: "Antalya Barosu 100. Yıl", width: 143, height: 144, chip: false },
 ];
 
 const STEPS = [
@@ -297,7 +297,7 @@ export default function Home() {
                   key={logo.src}
                   className="flex items-center justify-center rounded-[6px] bg-white px-2.5 py-2"
                 >
-                  <Image src={logo.src} alt={logo.alt} width={logo.width} height={logo.height} className="h-8 w-auto" />
+                  <Image src={logo.src} alt={logo.alt} width={logo.width} height={logo.height} className="h-12 w-auto" />
                 </div>
               ) : (
                 <Image
@@ -306,7 +306,7 @@ export default function Home() {
                   alt={logo.alt}
                   width={logo.width}
                   height={logo.height}
-                  className="h-8 w-auto"
+                  className="h-12 w-auto"
                 />
               ),
             )}
