@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useKazaBildir } from "@/contexts/KazaBildirContext";
+import { useKazaBildir, type EkBelgeler } from "@/contexts/KazaBildirContext";
 
-const MIN_FOTO = 3;
 const MAX_FOTO = 20;
+const MAX_EK_BELGE = 5; // Her ek belge kategorisi için ayrı ayrı
 const MAX_BOYUT = 10 * 1024 * 1024; // 10 MB
 
 type Foto = { file: File; url: string };
@@ -14,16 +14,194 @@ function gecerliGorsel(file: File) {
   return file.type.startsWith("image/") && file.size <= MAX_BOYUT;
 }
 
+function gecerliBelge(file: File) {
+  return (
+    (file.type === "application/pdf" || file.type.startsWith("image/")) &&
+    file.size <= MAX_BOYUT
+  );
+}
+
+function boyutMetni(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+const EK_BELGE_ALANLARI: { key: keyof EkBelgeler; baslik: string; aciklama: string }[] = [
+  {
+    key: "ifade",
+    baslik: "İfade verdim — İfade Örneği",
+    aciklama: "Kaza sonrası ifade verdiyseniz ifade tutanağının fotoğrafı veya PDF'i.",
+  },
+  {
+    key: "saglikRaporu",
+    baslik: "Sağlık Raporu",
+    aciklama: "Hastane/doktor raporu, epikriz vb. belgeler.",
+  },
+  {
+    key: "digerEvrak",
+    baslik: "Diğer Evraklar",
+    aciklama: "Başvurunuzla ilgili olduğunu düşündüğünüz diğer belgeler.",
+  },
+];
+
+/**
+ * Opsiyonel ek belge kategorisi — kapalı başlar, kullanıcı işaretleyince
+ * yükleme alanı açılır. İşaret kaldırılırsa seçilen dosyalar da temizlenir.
+ */
+function EkBelgeAlani({
+  alanKey,
+  baslik,
+  aciklama,
+  dosyalar,
+  onChange,
+}: {
+  alanKey: string;
+  baslik: string;
+  aciklama: string;
+  dosyalar: File[];
+  onChange: (dosyalar: File[]) => void;
+}) {
+  const [acik, setAcik] = useState(dosyalar.length > 0);
+  const [uyari, setUyari] = useState<string | null>(null);
+  const inputId = `ek-belge-${alanKey}`;
+  const doluMu = dosyalar.length >= MAX_EK_BELGE;
+
+  function handleFiles(fileList: FileList) {
+    const gelenler = Array.from(fileList);
+    const gecerliOlanlar = gelenler.filter(gecerliBelge);
+    const kalan = Math.max(MAX_EK_BELGE - dosyalar.length, 0);
+    const eklenecekler = gecerliOlanlar.slice(0, kalan);
+    const reddedilen = gelenler.length - gecerliOlanlar.length;
+    const kapasiteAsimi = gecerliOlanlar.length - eklenecekler.length;
+
+    if (eklenecekler.length > 0) onChange([...dosyalar, ...eklenecekler]);
+
+    if (reddedilen > 0) {
+      setUyari(`${reddedilen} dosya desteklenmiyor veya 10 MB sınırını aşıyor, eklenmedi.`);
+    } else if (kapasiteAsimi > 0) {
+      setUyari(`En fazla ${MAX_EK_BELGE} dosya eklenebilir, ${kapasiteAsimi} dosya eklenmedi.`);
+    } else {
+      setUyari(null);
+    }
+  }
+
+  return (
+    <div
+      className={[
+        "rounded-[6px] border transition-colors duration-150 ease-out",
+        acik ? "border-navy bg-navy/[0.02]" : "border-line",
+      ].join(" ")}
+    >
+      <label className="flex cursor-pointer items-start gap-3 px-4 py-3 focus-within:ring-2 focus-within:ring-navy/10">
+        <input
+          type="checkbox"
+          checked={acik}
+          onChange={(e) => {
+            setAcik(e.target.checked);
+            if (!e.target.checked) {
+              onChange([]);
+              setUyari(null);
+            }
+          }}
+          className="sr-only"
+        />
+        <span
+          aria-hidden="true"
+          className={[
+            "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border",
+            acik ? "border-navy bg-navy text-white" : "border-line",
+          ].join(" ")}
+        >
+          {acik && (
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          )}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className={["block text-[15px]", acik ? "font-medium text-navy" : "text-charcoal"].join(" ")}>
+            {baslik}
+            <span className="ml-1.5 text-[12px] font-normal text-slate">(opsiyonel)</span>
+          </span>
+          <span className="mt-0.5 block text-[12px] text-slate">{aciklama}</span>
+        </span>
+      </label>
+
+      {acik && (
+        <div className="px-4 pb-4">
+          {dosyalar.length > 0 && (
+            <ul className="space-y-2">
+              {dosyalar.map((file, i) => (
+                <li
+                  key={`${file.name}-${i}`}
+                  className="flex items-center gap-3 rounded-[6px] border border-line bg-paper px-3 py-2"
+                >
+                  <svg className="h-5 w-5 shrink-0 text-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                    <path d="M14 3v5h5" />
+                  </svg>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[13px] text-charcoal">{file.name}</div>
+                    <div className="text-[12px] text-slate">{boyutMetni(file.size)}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onChange(dosyalar.filter((_, j) => j !== i))}
+                    className="shrink-0 text-[13px] text-slate underline decoration-line underline-offset-2 transition-colors duration-150 ease-out hover:text-navy"
+                  >
+                    Kaldır
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {!doluMu && (
+            <label
+              htmlFor={inputId}
+              className={[
+                "flex cursor-pointer flex-col items-center justify-center gap-1 rounded-[6px]",
+                "border border-dashed border-line bg-mist/50 px-4 py-4 text-center",
+                "transition-colors duration-150 ease-out hover:border-slate",
+                dosyalar.length > 0 ? "mt-2" : "",
+              ].join(" ")}
+            >
+              <span className="text-[13px] font-medium text-navy">
+                {dosyalar.length > 0 ? "Dosya ekle" : "Dosya seç"}
+              </span>
+              <span className="text-[12px] text-slate">
+                PDF, JPG veya PNG · en fazla 10 MB · en fazla {MAX_EK_BELGE} dosya
+              </span>
+            </label>
+          )}
+          <input
+            id={inputId}
+            type="file"
+            accept="image/*,application/pdf"
+            multiple
+            className="sr-only"
+            onChange={(e) => {
+              if (e.target.files?.length) handleFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
+          {uyari && <p className="mt-2 text-[13px] text-urgent">{uyari}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function OlayYeriFotograflarForm() {
   const router = useRouter();
-  const { adim4, setAdim4 } = useKazaBildir();
+  const { adim4, setAdim4, ekBelgeler, setEkBelgeler } = useKazaBildir();
 
   // Geri dönülürse önceden seçilmiş fotoğraflar (context'ten) yeniden önizlenir.
   const [fotolar, setFotolar] = useState<Foto[]>(() =>
     adim4.map((file) => ({ file, url: URL.createObjectURL(file) })),
   );
   const [uyari, setUyari] = useState<string | null>(null);
-  const [dokunuldu, setDokunuldu] = useState(false);
+  const [ekler, setEkler] = useState<EkBelgeler>(ekBelgeler);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -33,12 +211,9 @@ export default function OlayYeriFotograflarForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const eksik = MIN_FOTO - fotolar.length;
-  const gecerli = fotolar.length >= MIN_FOTO;
   const doluMu = fotolar.length >= MAX_FOTO;
 
   function handleFiles(fileList: FileList) {
-    setDokunuldu(true);
     const gelenler = Array.from(fileList);
     const gecerliOlanlar = gelenler.filter(gecerliGorsel);
     const reddedilen = gelenler.length - gecerliOlanlar.length;
@@ -70,7 +245,6 @@ export default function OlayYeriFotograflarForm() {
   }
 
   function handleRemove(index: number) {
-    setDokunuldu(true);
     setFotolar((prev) => {
       const hedef = prev[index];
       if (hedef) URL.revokeObjectURL(hedef.url);
@@ -80,14 +254,13 @@ export default function OlayYeriFotograflarForm() {
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setDokunuldu(true);
-    if (!gecerli) return;
 
     const dosyalar = fotolar.map((f) => f.file);
     const meta = dosyalar.map((f) => ({ name: f.name, size: f.size, type: f.type }));
     console.log("Kaza Bildir — Adım 4 (olay yeri fotoğrafları):", meta);
 
     setAdim4(dosyalar);
+    setEkBelgeler(ekler);
     router.push("/kaza-bildir/yeni/tamamla");
   }
 
@@ -97,7 +270,7 @@ export default function OlayYeriFotograflarForm() {
         <span className="text-[13px] text-slate">
           {fotolar.length} / {MAX_FOTO} fotoğraf
         </span>
-        <span className="text-[13px] text-slate">En az {MIN_FOTO} fotoğraf</span>
+        <span className="text-[13px] text-slate">Opsiyonel</span>
       </div>
 
       {fotolar.length > 0 && (
@@ -184,22 +357,27 @@ export default function OlayYeriFotograflarForm() {
 
       {uyari && <p className="mt-2 text-[13px] text-urgent">{uyari}</p>}
 
-      {dokunuldu && !gecerli && (
-        <p className="mt-2 text-[13px] text-urgent">
-          En az {MIN_FOTO} fotoğraf gerekli — {eksik} tane daha ekleyin.
+      <div className="mt-8 border-t border-line pt-6">
+        <h2 className="font-serif text-lg font-medium text-navy">Diğer belgeler</h2>
+        <p className="mt-1 text-[13px] text-slate">
+          Elinizde varsa ilgili kutuyu işaretleyip dosya ekleyin.
         </p>
-      )}
+        <div className="mt-4 space-y-2.5">
+          {EK_BELGE_ALANLARI.map((alan) => (
+            <EkBelgeAlani
+              key={alan.key}
+              alanKey={alan.key}
+              baslik={alan.baslik}
+              aciklama={alan.aciklama}
+              dosyalar={ekler[alan.key]}
+              onChange={(dosyalar) => setEkler((prev) => ({ ...prev, [alan.key]: dosyalar }))}
+            />
+          ))}
+        </div>
+      </div>
 
       <div className="mt-6">
-        <button
-          type="submit"
-          disabled={!gecerli}
-          className={
-            gecerli
-              ? "cta w-full justify-center"
-              : "flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-[6px] bg-line px-[1.9rem] py-[0.95rem] text-[1.0625rem] font-semibold leading-none text-slate"
-          }
-        >
+        <button type="submit" className="cta w-full justify-center">
           Devam Et
           <svg
             width="18"
@@ -217,7 +395,7 @@ export default function OlayYeriFotograflarForm() {
         </button>
 
         <p className="mt-3 text-[13px] text-slate">
-          Fotoğraflarınız yalnızca bu başvuru için kullanılır.
+          Fotoğraflarınız ve belgeleriniz yalnızca bu başvuru için kullanılır.
         </p>
       </div>
     </form>

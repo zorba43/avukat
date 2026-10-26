@@ -40,8 +40,13 @@ model KazaBildirimi {
   // Adım 3 — Kaza raporu belgeleri (1-5 adet, PDF veya görsel)
   kazaRaporuUrls String[]
 
-  // Adım 4 — Olay yeri fotoğrafları (3-20 adet)
+  // Adım 4 — Olay yeri fotoğrafları (0-20 adet, opsiyonel)
   fotograflarUrls String[]
+
+  // Adım 4 — Opsiyonel ek belgeler (her biri 0-5 adet, PDF veya görsel)
+  ifadeUrls        String[] @default([])
+  saglikRaporuUrls String[] @default([])
+  digerEvrakUrls   String[] @default([])
 
   // Adım 5 — Tamamla
   kaynak      String

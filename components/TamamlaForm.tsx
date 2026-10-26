@@ -23,7 +23,7 @@ function blobaYukle(file: File, pathname: string) {
 
 export default function TamamlaForm() {
   const router = useRouter();
-  const { adim1, adim2, adim3, adim4, adim5, setAdim5 } = useKazaBildir();
+  const { adim1, adim2, adim3, adim4, ekBelgeler, adim5, setAdim5 } = useKazaBildir();
 
   const [kaynak, setKaynak] = useState(adim5?.kaynak ?? "");
   const [digerMetin, setDigerMetin] = useState(adim5?.kaynakDetay ?? "");
@@ -37,7 +37,7 @@ export default function TamamlaForm() {
   // Sayfa doğrudan açıldıysa ya da yenilendiyse (context sıfırlanır) önceki
   // adımlar eksik demektir — akışı baştan başlat.
   useEffect(() => {
-    if (!adim1 || !adim2 || adim3.length === 0 || adim4.length < 3) {
+    if (!adim1 || !adim2 || adim3.length === 0) {
       router.replace("/kaza-bildir/yeni");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -85,6 +85,12 @@ export default function TamamlaForm() {
           ? blobaYukle(file, `${klasorOneki}/karsi-taraf/${altKlasor}/${file.name}`)
           : Promise.resolve(undefined);
 
+      // Ek belgeler (ifade / sağlık raporu / diğer) opsiyonel — boşsa boş dizi döner.
+      const cokluYukle = (dosyalar: File[], altKlasor: string) =>
+        Promise.all(
+          dosyalar.map((f, i) => blobaYukle(f, `${klasorOneki}/${altKlasor}/${i}-${f.name}`)),
+        );
+
       const [
         ruhsatUrl,
         ehliyetOnUrl,
@@ -94,6 +100,9 @@ export default function TamamlaForm() {
         karsiTarafRuhsatUrl,
         karsiTarafEhliyetOnUrl,
         karsiTarafEhliyetArkaUrl,
+        ifadeUrls,
+        saglikRaporuUrls,
+        digerEvrakUrls,
       ] = await Promise.all([
         blobaYukle(adim2!.ruhsat, `${klasorOneki}/ruhsat/${adim2!.ruhsat.name}`),
         blobaYukle(
@@ -117,6 +126,9 @@ export default function TamamlaForm() {
         karsiTarafYukle(adim2!.karsiTarafRuhsat, "ruhsat"),
         karsiTarafYukle(adim2!.karsiTarafEhliyetOn, "ehliyet-on"),
         karsiTarafYukle(adim2!.karsiTarafEhliyetArka, "ehliyet-arka"),
+        cokluYukle(ekBelgeler.ifade, "ifade"),
+        cokluYukle(ekBelgeler.saglikRaporu, "saglik-raporu"),
+        cokluYukle(ekBelgeler.digerEvrak, "diger-evrak"),
       ]);
 
       const res = await fetch("/api/kaza-bildirimi", {
@@ -137,6 +149,9 @@ export default function TamamlaForm() {
           karsiTarafEhliyetArkaUrl,
           kazaRaporuUrls,
           fotograflarUrls,
+          ifadeUrls,
+          saglikRaporuUrls,
+          digerEvrakUrls,
           kaynak: adim5Verisi.kaynak,
           kaynakDetay: adim5Verisi.kaynakDetay,
         }),
@@ -160,7 +175,7 @@ export default function TamamlaForm() {
     }
   }
 
-  if (!adim1 || !adim2 || adim3.length === 0 || adim4.length < 3) {
+  if (!adim1 || !adim2 || adim3.length === 0) {
     return null;
   }
 

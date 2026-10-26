@@ -7,7 +7,7 @@ import OlayYeriFotograflarForm from "@/components/OlayYeriFotograflarForm";
 export const metadata: Metadata = {
   title: "Kaza Bildir · Olay Yeri Fotoğrafları — Gökçe Hukuk Bürosu",
   description:
-    "Kaza bildiriminin son adımı: olay yerinden en az 3, en fazla 20 fotoğraf.",
+    "Kaza bildiriminin dördüncü adımı: olay yeri fotoğrafları ve varsa ifade, sağlık raporu ve diğer evraklar.",
 };
 
 export default function KazaBildirStep4() {
@@ -35,8 +35,8 @@ export default function KazaBildirStep4() {
             Olay yeri fotoğraflarını ekleyin
           </h1>
           <p className="mt-2 text-sm text-slate">
-            Aracın ve kaza yerinin fotoğraflarını ekleyin — en az 3, en fazla 20
-            fotoğraf.
+            Elinizde varsa aracın ve kaza yerinin fotoğraflarını ekleyin — en
+            fazla 20 fotoğraf.
           </p>
 
           <OlayYeriFotograflarForm />

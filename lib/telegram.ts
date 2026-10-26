@@ -55,6 +55,9 @@ export async function sendKazaBildirimNotification({
   basvuruNiteligi,
   basvuruId,
   karsiTarafVarMi,
+  ifadeSayisi = 0,
+  saglikRaporuSayisi = 0,
+  digerEvrakSayisi = 0,
 }: {
   isimSoyisim: string;
   telefon: string;
@@ -63,10 +66,19 @@ export async function sendKazaBildirimNotification({
   basvuruId: string;
   /** true ise mesaja "Karşı Taraf Belgeleri: Yüklendi ✓" satırı eklenir; hiç yüklenmediyse satır hiç gösterilmez. */
   karsiTarafVarMi?: boolean;
+  /** 0'dan büyükse ilgili satır mesaja eklenir; hiç yoksa satır gösterilmez. */
+  ifadeSayisi?: number;
+  saglikRaporuSayisi?: number;
+  digerEvrakSayisi?: number;
 }) {
   const karsiTarafSatiri = karsiTarafVarMi
     ? "\nKarşı Taraf Belgeleri: Yüklendi ✓"
     : "";
+  const ekSatirlar = [
+    ifadeSayisi > 0 ? `\nİfade Örneği: ${ifadeSayisi} dosya ✓` : "",
+    saglikRaporuSayisi > 0 ? `\nSağlık Raporu: ${saglikRaporuSayisi} dosya ✓` : "",
+    digerEvrakSayisi > 0 ? `\nDiğer Evraklar: ${digerEvrakSayisi} dosya ✓` : "",
+  ].join("");
 
   const message = `
 🚨 Yeni Kaza Bildirimi
@@ -74,7 +86,7 @@ export async function sendKazaBildirimNotification({
 Ad Soyad: ${isimSoyisim}
 Telefon: ${formatTelefon(telefon)}
 Kaza Tarihi: ${formatTarih(kazaTarihi)}
-Başvuranın Niteliği: ${BASVURU_NITELIGI_ETIKETI[basvuruNiteligi] ?? basvuruNiteligi}${karsiTarafSatiri}
+Başvuranın Niteliği: ${BASVURU_NITELIGI_ETIKETI[basvuruNiteligi] ?? basvuruNiteligi}${karsiTarafSatiri}${ekSatirlar}
 
 📎 Dosyalara erişmek için: ${process.env.NEXT_PUBLIC_SITE_URL}/basvuru/${basvuruId}
   `.trim();

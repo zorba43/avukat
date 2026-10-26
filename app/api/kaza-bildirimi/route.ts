@@ -21,6 +21,9 @@ type Govde = {
   karsiTarafEhliyetArkaUrl?: string;
   kazaRaporuUrls: string[];
   fotograflarUrls: string[];
+  ifadeUrls?: string[];
+  saglikRaporuUrls?: string[];
+  digerEvrakUrls?: string[];
   kaynak: string;
   kaynakDetay?: string;
 };
@@ -59,12 +62,13 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  if (!Array.isArray(govde.fotograflarUrls) || govde.fotograflarUrls.length < 3) {
-    return NextResponse.json(
-      { error: "En az 3 olay yeri fotoğrafı gerekli." },
-      { status: 400 },
-    );
-  }
+  // Olay yeri fotoğrafları ve ek belgeler opsiyonel — dizi değilse boş kabul edilir.
+  const diziYap = (deger: unknown) =>
+    Array.isArray(deger) ? deger.filter((u): u is string => typeof u === "string") : [];
+  const fotograflarUrls = diziYap(govde.fotograflarUrls);
+  const ifadeUrls = diziYap(govde.ifadeUrls);
+  const saglikRaporuUrls = diziYap(govde.saglikRaporuUrls);
+  const digerEvrakUrls = diziYap(govde.digerEvrakUrls);
 
   // basvuruNo çakışırsa (Prisma P2002, @unique) birkaç kez yeniden üretip dener.
   let kayit;
@@ -86,7 +90,10 @@ export async function POST(request: Request) {
           karsiTarafEhliyetOnUrl: govde.karsiTarafEhliyetOnUrl || null,
           karsiTarafEhliyetArkaUrl: govde.karsiTarafEhliyetArkaUrl || null,
           kazaRaporuUrls: govde.kazaRaporuUrls!,
-          fotograflarUrls: govde.fotograflarUrls!,
+          fotograflarUrls,
+          ifadeUrls,
+          saglikRaporuUrls,
+          digerEvrakUrls,
           kaynak: govde.kaynak!,
           kaynakDetay: govde.kaynakDetay || null,
         },
@@ -114,6 +121,9 @@ export async function POST(request: Request) {
           kayit.karsiTarafEhliyetOnUrl ||
           kayit.karsiTarafEhliyetArkaUrl,
       ),
+      ifadeSayisi: kayit.ifadeUrls.length,
+      saglikRaporuSayisi: kayit.saglikRaporuUrls.length,
+      digerEvrakSayisi: kayit.digerEvrakUrls.length,
     });
   } catch (error) {
     // Telegram bildirimi başarısız olsa bile başvuru kaydedilmiş sayılır.

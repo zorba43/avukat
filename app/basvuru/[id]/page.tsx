@@ -57,6 +57,52 @@ function pdfMi(url: string) {
   return /\.pdf($|\?)/i.test(url);
 }
 
+/** PDF/görsel karışık belge listesi — her satır yeni sekmede açılır. */
+function BelgeListesi({ urls, etiket }: { urls: string[]; etiket: string }) {
+  return (
+    <ul className="mt-3 space-y-2.5">
+      {urls.map((url, i) => (
+        <li key={url}>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 rounded-[6px] border border-line px-4 py-3 text-[14px] text-charcoal transition-colors duration-150 ease-out hover:border-slate hover:text-navy"
+          >
+            <svg
+              className="h-5 w-5 shrink-0 text-amber"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              {pdfMi(url) ? (
+                <>
+                  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 3v5h5" />
+                </>
+              ) : (
+                <>
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <circle cx="8.5" cy="10" r="1.5" />
+                  <path d="m21 16-4.5-4.5L7 21" />
+                </>
+              )}
+            </svg>
+            <span className="min-w-0 flex-1 truncate">
+              {etiket} {i + 1} — {dosyaAdi(url)}
+            </span>
+            <span className="shrink-0 text-[12px] text-slate">Görüntüle ↗</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default async function BasvuruDetay({
   params,
 }: {
@@ -239,46 +285,9 @@ export default async function BasvuruDetay({
           <h2 className="font-serif text-xl font-medium text-navy">
             Kaza Raporu
           </h2>
-          <ul className="mt-5 space-y-2.5">
-            {basvuru.kazaRaporuUrls.map((url, i) => (
-              <li key={url}>
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-[6px] border border-line px-4 py-3 text-[14px] text-charcoal transition-colors duration-150 ease-out hover:border-slate hover:text-navy"
-                >
-                  <svg
-                    className="h-5 w-5 shrink-0 text-amber"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    {pdfMi(url) ? (
-                      <>
-                        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-                        <path d="M14 3v5h5" />
-                      </>
-                    ) : (
-                      <>
-                        <rect x="3" y="5" width="18" height="14" rx="2" />
-                        <circle cx="8.5" cy="10" r="1.5" />
-                        <path d="m21 16-4.5-4.5L7 21" />
-                      </>
-                    )}
-                  </svg>
-                  <span className="min-w-0 flex-1 truncate">
-                    Belge {i + 1} — {dosyaAdi(url)}
-                  </span>
-                  <span className="shrink-0 text-[12px] text-slate">Görüntüle ↗</span>
-                </a>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-5">
+            <BelgeListesi urls={basvuru.kazaRaporuUrls} etiket="Belge" />
+          </div>
         </section>
 
         {/* Olay yeri fotoğrafları */}
@@ -289,6 +298,9 @@ export default async function BasvuruDetay({
               ({basvuru.fotograflarUrls.length})
             </span>
           </h2>
+          {basvuru.fotograflarUrls.length === 0 && (
+            <p className="mt-3 text-[13px] text-slate">Fotoğraf eklenmedi.</p>
+          )}
           <div className="mt-5 grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-5">
             {basvuru.fotograflarUrls.map((url, i) => (
               <a
@@ -307,6 +319,27 @@ export default async function BasvuruDetay({
               </a>
             ))}
           </div>
+        </section>
+
+        {/* Ek belgeler — ifade / sağlık raporu / diğer (opsiyonel) */}
+        <section className="mt-6 rounded-card border border-line bg-paper p-6 sm:p-8">
+          <h2 className="font-serif text-xl font-medium text-navy">
+            Diğer Belgeler
+          </h2>
+          {[
+            { baslik: "İfade Örneği", etiket: "İfade", urls: basvuru.ifadeUrls },
+            { baslik: "Sağlık Raporu", etiket: "Rapor", urls: basvuru.saglikRaporuUrls },
+            { baslik: "Diğer Evraklar", etiket: "Evrak", urls: basvuru.digerEvrakUrls },
+          ].map((grup) => (
+            <div key={grup.baslik} className="mt-5">
+              <h3 className="text-[13px] font-semibold text-navy">{grup.baslik}</h3>
+              {grup.urls.length === 0 ? (
+                <p className="mt-2 text-[13px] text-slate">Belge eklenmedi.</p>
+              ) : (
+                <BelgeListesi urls={grup.urls} etiket={grup.etiket} />
+              )}
+            </div>
+          ))}
         </section>
       </main>
     </div>

@@ -5,8 +5,9 @@ export const runtime = "nodejs";
 
 /**
  * Kaza Bildir formundaki dosyalar (ruhsat/ehliyet, kaza raporu, olay yeri
- * fotoğrafları) tarayıcıdan doğrudan Vercel Blob'a yüklenir — büyük toplam
- * boyut (en fazla 28 dosya x 10 MB) sunucu fonksiyonunun istek boyutu
+ * fotoğrafları, ifade/sağlık raporu/diğer evraklar) tarayıcıdan doğrudan
+ * Vercel Blob'a yüklenir — büyük toplam
+ * boyut (en fazla 43 dosya x 10 MB) sunucu fonksiyonunun istek boyutu
  * sınırını aşabileceği için dosyalar hiçbir zaman bu API route'un gövdesinden
  * geçmez. Bu route yalnızca yükleme için kısa ömürlü bir token imzalar.
  */
