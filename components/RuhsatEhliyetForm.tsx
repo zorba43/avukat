@@ -24,12 +24,12 @@ const SOL_ALANLAR: AlanTanimi[] = [
   },
   {
     key: "ehliyetOn",
-    baslik: "Ehliyetinizin Ön Yüzü",
+    baslik: "Ehliyetinizin Ön Yüzü (Yoksa Kimlik Fotoğrafı)",
     aciklama: "Sürücü belgenizin fotoğraflı ön yüzü.",
   },
   {
     key: "ehliyetArka",
-    baslik: "Ehliyetinizin Arka Yüzü",
+    baslik: "Ehliyetinizin Arka Yüzü (Yoksa Kimlik Arka Yüzü)",
     aciklama: "Sürücü belgenizin arka yüzü.",
   },
 ];
