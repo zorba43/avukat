@@ -43,6 +43,7 @@ export type EkBelgeler = {
 export const BOS_EK_BELGELER: EkBelgeler = { ifade: [], saglikRaporu: [], digerEvrak: [] };
 
 export type Adim5Verisi = {
+  talepler: string[]; // bkz. lib/talepler.ts — en az bir tane
   kaynak: string;
   kaynakDetay?: string;
 };

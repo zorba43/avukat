@@ -34,8 +34,8 @@ export default function KazaBildirStep5() {
             Son bir soru
           </h1>
           <p className="mt-2 text-sm text-slate">
-            Bildiriminizi tamamlamadan önce, bize nasıl ulaştığınızı öğrenmek
-            isteriz.
+            Bildiriminizi tamamlamadan önce, bizden başlıca taleplerinizi ve
+            bize nasıl ulaştığınızı öğrenmek isteriz.
           </p>
 
           <TamamlaForm />

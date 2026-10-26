@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { useKazaBildir } from "@/contexts/KazaBildirContext";
 import { basvuruKlasoru } from "@/lib/basvuru";
+import { TALEP_SECENEKLERI } from "@/lib/talepler";
 
 const KAYNAK_SECENEKLERI = [
   { value: "sosyal", label: "Sosyal Medya" },
-  { value: "arkadas", label: "Arkadaş Tavsiyesi" },
+  { value: "federasyon", label: "Akdeniz Motosikletli Kuryeler Federasyonu" },
   { value: "diger", label: "Diğer" },
 ];
 
@@ -25,6 +26,7 @@ export default function TamamlaForm() {
   const router = useRouter();
   const { adim1, adim2, adim3, adim4, ekBelgeler, adim5, setAdim5 } = useKazaBildir();
 
+  const [talepler, setTalepler] = useState<string[]>(adim5?.talepler ?? []);
   const [kaynak, setKaynak] = useState(adim5?.kaynak ?? "");
   const [digerMetin, setDigerMetin] = useState(adim5?.kaynakDetay ?? "");
   const [dokunuldu, setDokunuldu] = useState(false);
@@ -45,6 +47,8 @@ export default function TamamlaForm() {
 
   const digerSecili = kaynak === "diger";
 
+  const talepHatasi = talepler.length === 0 ? "En az bir talep seçin." : undefined;
+
   const hata = useMemo(() => {
     if (!kaynak) return "Bize nasıl ulaştığınızı seçin.";
     if (digerSecili && digerMetin.trim().length === 0) {
@@ -53,7 +57,7 @@ export default function TamamlaForm() {
     return undefined;
   }, [kaynak, digerSecili, digerMetin]);
 
-  const gecerli = !hata;
+  const gecerli = !hata && !talepHatasi;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,6 +65,7 @@ export default function TamamlaForm() {
     if (!gecerli || gonderiliyor) return;
 
     const adim5Verisi = {
+      talepler,
       kaynak,
       kaynakDetay: digerSecili ? digerMetin.trim() : undefined,
     };
@@ -152,6 +157,7 @@ export default function TamamlaForm() {
           ifadeUrls,
           saglikRaporuUrls,
           digerEvrakUrls,
+          talepler: adim5Verisi.talepler,
           kaynak: adim5Verisi.kaynak,
           kaynakDetay: adim5Verisi.kaynakDetay,
         }),
@@ -264,6 +270,64 @@ export default function TamamlaForm() {
   return (
     <form onSubmit={handleSubmit} noValidate className="mt-7">
       <fieldset>
+        <legend className="text-[13px] text-slate">
+          Bizden başlıca talepleriniz nelerdir?{" "}
+          <span className="text-slate/70">(birden fazla seçebilirsiniz)</span>
+        </legend>
+        <div className="mt-1.5 space-y-2.5">
+          {TALEP_SECENEKLERI.map((secenek) => {
+            const secili = talepler.includes(secenek.value);
+            return (
+              <label
+                key={secenek.value}
+                className={[
+                  "flex cursor-pointer items-center gap-3 rounded-[6px] border px-4 py-3 text-[15px]",
+                  "transition-colors duration-150 ease-out",
+                  "focus-within:ring-2 focus-within:ring-navy/10",
+                  secili
+                    ? "border-navy bg-navy/[0.04] font-medium text-navy"
+                    : "border-line text-charcoal hover:border-slate",
+                ].join(" ")}
+              >
+                <input
+                  type="checkbox"
+                  name="talepler"
+                  value={secenek.value}
+                  checked={secili}
+                  onChange={(e) => {
+                    setTalepler((prev) =>
+                      e.target.checked
+                        ? [...prev, secenek.value]
+                        : prev.filter((t) => t !== secenek.value),
+                    );
+                    setDokunuldu(true);
+                  }}
+                  className="sr-only"
+                />
+                <span
+                  aria-hidden="true"
+                  className={[
+                    "flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border",
+                    secili ? "border-navy bg-navy text-white" : "border-line",
+                  ].join(" ")}
+                >
+                  {secili && (
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  )}
+                </span>
+                {secenek.label}
+              </label>
+            );
+          })}
+        </div>
+        {dokunuldu && talepHatasi && (
+          <p className="mt-1.5 text-[13px] text-urgent">{talepHatasi}</p>
+        )}
+      </fieldset>
+
+      <fieldset className="mt-7">
         <legend className="text-[13px] text-slate">Bize nasıl ulaştınız?</legend>
         <div className="mt-1.5 space-y-2.5">
           {KAYNAK_SECENEKLERI.map((secenek) => {

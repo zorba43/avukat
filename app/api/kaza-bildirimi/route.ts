@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { sendKazaBildirimNotification } from "@/lib/telegram";
 import { uretBasvuruNo } from "@/lib/basvuru";
+import { gecerliTalepMi } from "@/lib/talepler";
 
 export const runtime = "nodejs";
 
@@ -24,6 +25,7 @@ type Govde = {
   ifadeUrls?: string[];
   saglikRaporuUrls?: string[];
   digerEvrakUrls?: string[];
+  talepler: string[];
   kaynak: string;
   kaynakDetay?: string;
 };
@@ -70,6 +72,13 @@ export async function POST(request: Request) {
   const saglikRaporuUrls = diziYap(govde.saglikRaporuUrls);
   const digerEvrakUrls = diziYap(govde.digerEvrakUrls);
 
+  const talepler = Array.isArray(govde.talepler)
+    ? Array.from(new Set(govde.talepler.filter(gecerliTalepMi)))
+    : [];
+  if (talepler.length === 0) {
+    return NextResponse.json({ error: "En az bir talep seçilmeli." }, { status: 400 });
+  }
+
   // basvuruNo çakışırsa (Prisma P2002, @unique) birkaç kez yeniden üretip dener.
   let kayit;
   for (let deneme = 0; ; deneme++) {
@@ -94,6 +103,7 @@ export async function POST(request: Request) {
           ifadeUrls,
           saglikRaporuUrls,
           digerEvrakUrls,
+          talepler,
           kaynak: govde.kaynak!,
           kaynakDetay: govde.kaynakDetay || null,
         },
@@ -124,6 +134,7 @@ export async function POST(request: Request) {
       ifadeSayisi: kayit.ifadeUrls.length,
       saglikRaporuSayisi: kayit.saglikRaporuUrls.length,
       digerEvrakSayisi: kayit.digerEvrakUrls.length,
+      talepler: kayit.talepler,
     });
   } catch (error) {
     // Telegram bildirimi başarısız olsa bile başvuru kaydedilmiş sayılır.

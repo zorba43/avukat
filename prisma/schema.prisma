@@ -49,6 +49,8 @@ model KazaBildirimi {
   digerEvrakUrls   String[] @default([])
 
   // Adım 5 — Tamamla
+  /// "Bizden başlıca talepleriniz" — kısa kodlar, bkz. lib/talepler.ts
+  talepler    String[] @default([])
   kaynak      String
   kaynakDetay String?
 }

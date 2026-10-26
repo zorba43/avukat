@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { talepEtiketi } from "@/lib/talepler";
 
 export const metadata: Metadata = {
   title: "Kaza Bildirimi Detayı — Gökçe Hukuk Bürosu",
@@ -40,6 +41,8 @@ const KAZA_DURUMU_ETIKETI: Record<string, string> = {
 
 const KAYNAK_ETIKETI: Record<string, string> = {
   sosyal: "Sosyal Medya",
+  federasyon: "Akdeniz Motosikletli Kuryeler Federasyonu",
+  // Eski kayıtlar için — bu seçenek formdan kaldırıldı.
   arkadas: "Arkadaş Tavsiyesi",
   diger: "Diğer",
 };
@@ -183,6 +186,14 @@ export default async function BasvuruDetay({
               <dt className="text-[13px] text-slate">Kaza Durumu</dt>
               <dd className="mt-1 text-[15px] text-charcoal">
                 {KAZA_DURUMU_ETIKETI[basvuru.kazaDurumu] ?? basvuru.kazaDurumu}
+              </dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-[13px] text-slate">Başlıca Talepleri</dt>
+              <dd className="mt-1 text-[15px] text-charcoal">
+                {basvuru.talepler.length > 0
+                  ? basvuru.talepler.map(talepEtiketi).join(", ")
+                  : "Belirtilmedi"}
               </dd>
             </div>
             <div>

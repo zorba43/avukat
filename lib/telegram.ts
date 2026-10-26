@@ -1,3 +1,5 @@
+import { talepEtiketi } from "@/lib/talepler";
+
 /** 11 haneli rakam dizisini "05XX XXX XX XX" biçiminde okunur hale getirir. */
 function formatTelefon(raw: string) {
   const d = raw.replace(/\D/g, "");
@@ -58,6 +60,7 @@ export async function sendKazaBildirimNotification({
   ifadeSayisi = 0,
   saglikRaporuSayisi = 0,
   digerEvrakSayisi = 0,
+  talepler = [],
 }: {
   isimSoyisim: string;
   telefon: string;
@@ -70,6 +73,8 @@ export async function sendKazaBildirimNotification({
   ifadeSayisi?: number;
   saglikRaporuSayisi?: number;
   digerEvrakSayisi?: number;
+  /** Kısa kodlar (bkz. lib/talepler.ts) */
+  talepler?: string[];
 }) {
   const karsiTarafSatiri = karsiTarafVarMi
     ? "\nKarşı Taraf Belgeleri: Yüklendi ✓"
@@ -79,6 +84,8 @@ export async function sendKazaBildirimNotification({
     saglikRaporuSayisi > 0 ? `\nSağlık Raporu: ${saglikRaporuSayisi} dosya ✓` : "",
     digerEvrakSayisi > 0 ? `\nDiğer Evraklar: ${digerEvrakSayisi} dosya ✓` : "",
   ].join("");
+  const talepSatiri =
+    talepler.length > 0 ? `\nTalepler: ${talepler.map(talepEtiketi).join(", ")}` : "";
 
   const message = `
 🚨 Yeni Kaza Bildirimi
@@ -86,7 +93,7 @@ export async function sendKazaBildirimNotification({
 Ad Soyad: ${isimSoyisim}
 Telefon: ${formatTelefon(telefon)}
 Kaza Tarihi: ${formatTarih(kazaTarihi)}
-Başvuranın Niteliği: ${BASVURU_NITELIGI_ETIKETI[basvuruNiteligi] ?? basvuruNiteligi}${karsiTarafSatiri}${ekSatirlar}
+Başvuranın Niteliği: ${BASVURU_NITELIGI_ETIKETI[basvuruNiteligi] ?? basvuruNiteligi}${talepSatiri}${karsiTarafSatiri}${ekSatirlar}
 
 📎 Dosyalara erişmek için: ${process.env.NEXT_PUBLIC_SITE_URL}/basvuru/${basvuruId}
   `.trim();
